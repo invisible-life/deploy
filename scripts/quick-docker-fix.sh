@@ -37,7 +37,7 @@ kubectl create secret docker-registry dockerhub-secret \
 
 # Restart all deployments to pick up the new secret
 echo -e "${BLUE}Restarting deployments...${NC}"
-kubectl rollout restart deployment -n invisible --all
+kubectl get deployments -n invisible -o name | xargs -I {} kubectl rollout restart {} -n invisible
 
 echo ""
 echo -e "${GREEN}✅ Done! The deployments should now be able to pull images.${NC}"

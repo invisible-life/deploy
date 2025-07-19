@@ -76,11 +76,3 @@ spec:
             port: 4300
           initialDelaySeconds: 5
           periodSeconds: 5
-        volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-      volumes:
-      - name: docker-socket
-        hostPath:
-          path: /var/run/docker.sock
-          type: Socket
