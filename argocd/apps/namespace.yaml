@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/invisible-life/invisible-deploy  # Update with your repo URL
+    repoURL: https://github.com/invisible-life/deploy  # Update with your repo URL
     targetRevision: HEAD
     path: k8s/base/namespace
   destination:

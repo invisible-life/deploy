@@ -7,7 +7,7 @@ This repository deploys the Invisible platform using Kubernetes and ArgoCD.
 Run this single command on your Linux server:
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/invisible-life/invisible-deploy/main/scripts/deploy.sh | sh -
+curl -sfL https://raw.githubusercontent.com/invisible-life/deploy/main/scripts/deploy.sh | sh -
 ```
 
 ## Local Development (Mac/Linux)
@@ -15,8 +15,8 @@ curl -sfL https://raw.githubusercontent.com/invisible-life/invisible-deploy/main
 For local testing:
 
 ```bash
-git clone https://github.com/invisible-life/invisible-deploy.git
-cd invisible-deploy
+git clone https://github.com/invisible-life/deploy.git
+cd deploy
 ./scripts/deploy-local.sh
 ```
 
@@ -48,7 +48,7 @@ Credentials will be displayed after installation.
 ## Repository Structure
 
 ```
-invisible-deploy/
+deploy/
 ├── argocd/apps/        # ArgoCD application definitions
 ├── k8s/                # Kubernetes manifests
 │   ├── base/          # Base configurations
@@ -62,8 +62,8 @@ If you need more control:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/invisible-life/invisible-deploy.git
-cd invisible-deploy
+git clone https://github.com/invisible-life/deploy.git
+cd deploy
 
 # 2. Run setup
 ./scripts/setup.sh

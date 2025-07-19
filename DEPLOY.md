@@ -19,8 +19,8 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/invisible-life/invisible-deploy.git
-cd invisible-deploy
+git clone https://github.com/invisible-life/deploy.git
+cd deploy
 ```
 
 ### 2. Generate secrets

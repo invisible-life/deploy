@@ -77,8 +77,8 @@ fi
 echo "${BLUE}Cloning deployment repository...${NC}"
 TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
-git clone https://github.com/invisible-life/invisible-deploy.git
-cd invisible-deploy
+git clone https://github.com/invisible-life/deploy.git
+cd deploy
 
 # Generate secrets
 echo "${BLUE}Generating secrets...${NC}"
@@ -129,4 +129,4 @@ echo ""
 echo "${YELLOW}Note: Services may take a few minutes to become fully available.${NC}"
 echo "${YELLOW}Check ArgoCD UI for real-time deployment status.${NC}"
 echo ""
-echo "${GREEN}Deployment files saved in: $TEMP_DIR/invisible-deploy${NC}"
+echo "${GREEN}Deployment files saved in: $TEMP_DIR/deploy${NC}"

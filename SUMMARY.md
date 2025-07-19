@@ -7,7 +7,7 @@ This repository provides a complete GitOps deployment solution for the Invisible
 ### Repository Structure
 
 ```
-invisible-deploy/
+deploy/
 ├── argocd/apps/              # ArgoCD Application definitions
 │   ├── app-of-apps.yaml     # Root application that manages all others
 │   ├── namespace.yaml       # Namespace application

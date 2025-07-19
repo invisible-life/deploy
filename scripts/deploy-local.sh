@@ -102,7 +102,7 @@ echo "${BLUE}Generating secrets...${NC}"
 if [ -f "./scripts/generate-secrets.sh" ]; then
     ./scripts/generate-secrets.sh
 else
-    echo "${RED}generate-secrets.sh not found. Make sure you're in the invisible-deploy directory${NC}"
+    echo "${RED}generate-secrets.sh not found. Make sure you're in the deploy directory${NC}"
     exit 1
 fi
 

@@ -32,7 +32,7 @@ kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -
 
 ### 3. Deploy Invisible Platform
 ```bash
-cd invisible-deploy
+cd deploy
 
 # Generate secrets
 ./scripts/generate-secrets.sh

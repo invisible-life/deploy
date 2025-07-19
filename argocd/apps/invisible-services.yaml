@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/invisible-life/invisible-deploy
+    repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
     path: k8s/base/services
   destination:

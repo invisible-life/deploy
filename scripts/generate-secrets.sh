@@ -13,7 +13,7 @@ echo "=============================================="
 
 # Check if we're in the right directory
 if [ ! -f "README.md" ] || [ ! -d "k8s" ]; then
-    echo -e "${RED}Error: This script must be run from the invisible-deploy root directory${NC}"
+    echo -e "${RED}Error: This script must be run from the deploy root directory${NC}"
     exit 1
 fi
 
