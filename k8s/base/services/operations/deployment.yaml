@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invisible-operations
+  labels:
+    app.kubernetes.io/name: invisible-operations
+    app.kubernetes.io/component: operations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: invisible-operations
+      app.kubernetes.io/component: operations
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: invisible-operations
+        app.kubernetes.io/component: operations
+    spec:
+      containers:
+      - name: operations
+        image: invisiblelife/operations:latest
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        - name: OPERATIONS_API_PORT
+          value: "8081"
+        - name: DOCKER_HUB_USERNAME
+          value: "invisiblelife"
+        - name: DOCKER_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DOCKER_HUB_TOKEN
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: JWT_SECRET
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi

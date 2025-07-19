@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: etl-storage
+  labels:
+    app.kubernetes.io/name: invisible-etl
+    app.kubernetes.io/component: etl
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

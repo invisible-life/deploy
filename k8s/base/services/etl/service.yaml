@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: invisible-etl
+  labels:
+    app.kubernetes.io/name: invisible-etl
+    app.kubernetes.io/component: etl
+spec:
+  type: ClusterIP
+  ports:
+  - port: 4001
+    targetPort: 4001
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: invisible-etl
+    app.kubernetes.io/component: etl

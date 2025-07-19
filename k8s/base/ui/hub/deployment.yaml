@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-hub
+  labels:
+    app.kubernetes.io/name: ui-hub
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui-hub
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ui-hub
+        app.kubernetes.io/component: frontend
+    spec:
+      containers:
+      - name: ui-hub
+        image: invisiblelife/ui-hub:latest
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        # These are baked into the image at build time, but can be overridden
+        - name: VITE_SUPABASE_URL
+          value: "http://supabase-kong:8000"
+        - name: VITE_SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: VITE_API_URL
+          value: "http://invisible-api:4300"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi

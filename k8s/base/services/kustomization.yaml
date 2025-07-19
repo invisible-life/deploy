@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: invisible
+
+resources:
+  - api/
+  - etl/
+  - processor/
+  - schema/
+  - operations/
+  - ollama/
+
+commonLabels:
+  app.kubernetes.io/part-of: invisible-platform
+  app.kubernetes.io/managed-by: argocd

@@ -1,0 +1,30 @@
+# Secrets - NEVER commit these!
+secrets.env
+*.secrets
+k8s/base/supabase/supabase.secrets
+k8s/base/services/services.secrets
+k8s/base/ui/ui.secrets
+
+# Environment files with sensitive data
+*.env
+!*.env.example
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Kompose binary
+kompose
+
+# Generated files
+/k8s/generated/
+
+# Helm charts (if using)
+charts/*.tgz

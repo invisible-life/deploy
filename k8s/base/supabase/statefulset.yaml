@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: supabase
+  labels:
+    app.kubernetes.io/name: supabase
+    app.kubernetes.io/component: infrastructure
+spec:
+  serviceName: supabase
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: supabase
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: supabase
+    spec:
+      containers:
+      - name: supabase
+        image: docker:24-dind
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 8000
+          name: kong-http
+        - containerPort: 8443
+          name: kong-https
+        - containerPort: 5432
+          name: postgres
+        - containerPort: 4000
+          name: analytics
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+        # Pass secrets to the init script
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: JWT_SECRET
+        - name: ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SERVICE_ROLE_KEY
+        - name: DASHBOARD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: DASHBOARD_PASSWORD
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SECRET_KEY_BASE
+        - name: VAULT_ENC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: VAULT_ENC_KEY
+        - name: LOGFLARE_PUBLIC_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: LOGFLARE_PUBLIC_ACCESS_TOKEN
+        - name: LOGFLARE_PRIVATE_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: LOGFLARE_PRIVATE_ACCESS_TOKEN
+        volumeMounts:
+        - name: docker-graph
+          mountPath: /var/lib/docker
+        - name: supabase-config
+          mountPath: /supabase
+        - name: init-script
+          mountPath: /init.sh
+          subPath: init.sh
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          # Start Docker daemon
+          dockerd &
+          
+          # Wait for Docker to be ready
+          while ! docker info >/dev/null 2>&1; do
+            echo "Waiting for Docker daemon..."
+            sleep 2
+          done
+          
+          # Run init script
+          sh /init.sh
+          
+          # Keep container running
+          tail -f /dev/null
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+      volumes:
+      - name: docker-graph
+        emptyDir: {}
+      - name: init-script
+        configMap:
+          name: supabase-init
+          defaultMode: 0755
+  volumeClaimTemplates:
+  - metadata:
+      name: supabase-config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 20Gi

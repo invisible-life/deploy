@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invisible-etl
+  labels:
+    app.kubernetes.io/name: invisible-etl
+    app.kubernetes.io/component: etl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: invisible-etl
+      app.kubernetes.io/component: etl
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: invisible-etl
+        app.kubernetes.io/component: etl
+    spec:
+      containers:
+      - name: etl
+        image: invisiblelife/etl:latest
+        ports:
+        - containerPort: 4001
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "4001"
+        # Database
+        - name: DATABASE_URL
+          value: "postgresql://postgres:$(POSTGRES_PASSWORD)@supabase-db:5432/postgres"
+        - name: DATABASE_ADMIN_USER
+          value: "postgres"
+        - name: DATABASE_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        # Encryption
+        - name: CREDENTIALS_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: CREDENTIALS_ENCRYPTION_KEY
+        # Sync settings
+        - name: ENABLE_AUTO_SYNC
+          value: "true"
+        - name: SYNC_INTERVAL_MINUTES
+          value: "60"
+        - name: PLATFORMS_TO_LOAD
+          value: "all"
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 4001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 4001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: etl-storage
+          mountPath: /app/storage
+        - name: etl-logs
+          mountPath: /app/logs
+        - name: etl-responses
+          mountPath: /app/responses
+        - name: etl-credentials
+          mountPath: /app/credentials
+      volumes:
+      - name: etl-storage
+        persistentVolumeClaim:
+          claimName: etl-storage
+      - name: etl-logs
+        emptyDir: {}
+      - name: etl-responses
+        emptyDir: {}
+      - name: etl-credentials
+        emptyDir: {}

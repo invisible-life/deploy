@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-init
+data:
+  init.sh: |
+    #!/bin/sh
+    set -e
+    
+    cd /supabase
+    
+    # Download Supabase docker-compose if not exists
+    if [ ! -f docker-compose.yml ]; then
+      echo "Downloading Supabase docker-compose..."
+      wget -q https://raw.githubusercontent.com/supabase/supabase/master/docker/docker-compose.yml
+      wget -q https://raw.githubusercontent.com/supabase/supabase/master/docker/.env.example
+      
+      # Create .env file from K8s secrets/configmap
+      cat > .env <<'EOF'
+    ############
+    # Secrets
+    ############
+    POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    JWT_SECRET=${JWT_SECRET}
+    ANON_KEY=${ANON_KEY}
+    SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
+    DASHBOARD_USERNAME=supabase
+    DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
+    
+    ############
+    # Database
+    ############
+    POSTGRES_HOST=db
+    POSTGRES_PORT=5432
+    POSTGRES_DB=postgres
+    
+    ############
+    # API Proxy
+    ############
+    KONG_HTTP_PORT=8000
+    KONG_HTTPS_PORT=8443
+    
+    ############
+    # API
+    ############
+    PGRST_DB_SCHEMAS=public,storage,graphql_public
+    PGRST_DB_ANON_ROLE=anon
+    PGRST_DB_USE_LEGACY_GUCS=false
+    
+    ############
+    # Auth
+    ############
+    SITE_URL=http://localhost:3000
+    ADDITIONAL_REDIRECT_URLS=
+    JWT_EXPIRY=3600
+    DISABLE_SIGNUP=false
+    API_EXTERNAL_URL=http://supabase:8000
+    MAILER_URLPATHS_INVITE=/auth/v1/verify
+    MAILER_URLPATHS_CONFIRMATION=/auth/v1/verify
+    MAILER_URLPATHS_RECOVERY=/auth/v1/verify
+    MAILER_URLPATHS_EMAIL_CHANGE=/auth/v1/verify
+    
+    ############
+    # Logs
+    ############
+    LOGFLARE_PUBLIC_ACCESS_TOKEN=${LOGFLARE_PUBLIC_ACCESS_TOKEN}
+    LOGFLARE_PRIVATE_ACCESS_TOKEN=${LOGFLARE_PRIVATE_ACCESS_TOKEN}
+    
+    ############
+    # Studio
+    ############
+    STUDIO_DEFAULT_ORGANIZATION=Default
+    STUDIO_DEFAULT_PROJECT=Default
+    SUPABASE_PUBLIC_URL=http://supabase:8000
+    
+    ############
+    # Email / SMS
+    ############
+    ENABLE_EMAIL_SIGNUP=true
+    ENABLE_EMAIL_AUTOCONFIRM=false
+    SMTP_ADMIN_EMAIL=admin@example.com
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=
+    SMTP_PASS=
+    SMTP_SENDER_NAME=Supabase
+    ENABLE_PHONE_SIGNUP=false
+    ENABLE_PHONE_AUTOCONFIRM=false
+    ENABLE_ANONYMOUS_USERS=false
+    
+    ############
+    # Storage
+    ############
+    STORAGE_BACKEND=file
+    FILE_SIZE_LIMIT=52428800
+    
+    ############
+    # Other
+    ############
+    SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    VAULT_ENC_KEY=${VAULT_ENC_KEY}
+    FUNCTIONS_VERIFY_JWT=false
+    IMGPROXY_ENABLE_WEBP_DETECTION=true
+    POOLER_DEFAULT_POOL_SIZE=20
+    POOLER_MAX_CLIENT_CONN=100
+    POOLER_TENANT_ID=local
+    POOLER_DB_POOL_SIZE=10
+    DOCKER_SOCKET_LOCATION=/var/run/docker.sock
+    EOF
+      
+      # Substitute environment variables
+      envsubst < .env > .env.tmp && mv .env.tmp .env
+    fi
+    
+    # Create volumes directories
+    mkdir -p volumes/api volumes/db/data volumes/storage volumes/functions
+    
+    # Start Supabase
+    echo "Starting Supabase services..."
+    docker compose up -d
+    
+    echo "Supabase is starting up!"

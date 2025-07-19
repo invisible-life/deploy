@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase
+  labels:
+    app.kubernetes.io/name: supabase
+    app.kubernetes.io/component: infrastructure
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: kong-http
+  - port: 8443
+    targetPort: 8443
+    protocol: TCP
+    name: kong-https
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  - port: 4000
+    targetPort: 4000
+    protocol: TCP
+    name: analytics
+  selector:
+    app.kubernetes.io/name: supabase
+---
+# Separate services for each component to match what other services expect
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-db
+  labels:
+    app.kubernetes.io/name: supabase
+    app.kubernetes.io/component: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app.kubernetes.io/name: supabase
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-kong
+  labels:
+    app.kubernetes.io/name: supabase
+    app.kubernetes.io/component: api-gateway
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  - port: 8443
+    targetPort: 8443
+    protocol: TCP
+    name: https
+  selector:
+    app.kubernetes.io/name: supabase

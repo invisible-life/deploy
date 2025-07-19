@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: invisible
+  labels:
+    app.kubernetes.io/name: invisible
+    app.kubernetes.io/part-of: invisible-platform

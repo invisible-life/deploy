@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: invisible-schema
+  labels:
+    app.kubernetes.io/name: invisible-schema
+    app.kubernetes.io/component: schema
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: invisible-schema
+    app.kubernetes.io/component: schema
