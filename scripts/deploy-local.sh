@@ -106,6 +106,15 @@ else
     exit 1
 fi
 
+# Setup Docker Hub authentication
+echo "${BLUE}Setting up Docker Hub authentication...${NC}"
+if [ -f "./scripts/setup-docker-auth.sh" ]; then
+    ./scripts/setup-docker-auth.sh
+else
+    echo "${YELLOW}Warning: setup-docker-auth.sh not found. Skipping Docker auth setup.${NC}"
+    echo "${YELLOW}You may need to manually configure Docker Hub credentials for private images.${NC}"
+fi
+
 # Deploy applications
 echo "${BLUE}Deploying Invisible platform...${NC}"
 kubectl apply -f argocd/apps/app-of-apps.yaml

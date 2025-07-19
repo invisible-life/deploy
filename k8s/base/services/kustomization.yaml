@@ -14,3 +14,8 @@ resources:
 commonLabels:
   app.kubernetes.io/part-of: invisible-platform
   app.kubernetes.io/managed-by: argocd
+
+patches:
+  - path: ../patches/image-pull-secrets.yaml
+    target:
+      kind: Deployment
