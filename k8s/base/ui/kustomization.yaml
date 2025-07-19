@@ -12,6 +12,6 @@ commonLabels:
   app.kubernetes.io/managed-by: argocd
 
 patches:
-  - path: ../patches/image-pull-secrets.yaml
+  - path: patches/image-pull-secrets.yaml
     target:
       kind: Deployment
