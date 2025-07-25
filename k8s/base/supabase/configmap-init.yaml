@@ -16,7 +16,7 @@ data:
       wget -q https://raw.githubusercontent.com/supabase/supabase/master/docker/.env.example
       
       # Create .env file from K8s secrets/configmap
-      cat > .env <<'EOF'
+      cat > .env <<EOF
     ############
     # Secrets
     ############
@@ -107,9 +107,6 @@ data:
     POOLER_DB_POOL_SIZE=10
     DOCKER_SOCKET_LOCATION=/var/run/docker.sock
     EOF
-      
-      # Substitute environment variables
-      envsubst < .env > .env.tmp && mv .env.tmp .env
     fi
     
     # Create volumes directories
@@ -118,5 +115,25 @@ data:
     # Start Supabase
     echo "Starting Supabase services..."
     docker compose up -d
+    
+    # Wait for services to start
+    echo "Waiting for services to start..."
+    sleep 10
+    
+    # Check service status
+    docker compose ps
+    
+    # Check if database is ready
+    max_attempts=30
+    attempt=0
+    while [ $attempt -lt $max_attempts ]; do
+      if docker compose exec -T db pg_isready -U postgres; then
+        echo "Database is ready!"
+        break
+      fi
+      echo "Waiting for database... (attempt $((attempt+1))/$max_attempts)"
+      sleep 5
+      attempt=$((attempt+1))
+    done
     
     echo "Supabase is starting up!"

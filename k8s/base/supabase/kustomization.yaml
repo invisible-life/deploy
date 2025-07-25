@@ -4,9 +4,7 @@ kind: Kustomization
 namespace: invisible
 
 resources:
-  - statefulset.yaml
-  - service.yaml
-  - configmap-init.yaml
+  - postgres/
 
 # Common labels
 commonLabels:

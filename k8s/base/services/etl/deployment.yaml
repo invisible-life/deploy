@@ -29,8 +29,28 @@ spec:
         - name: PORT
           value: "4001"
         # Database
-        - name: DATABASE_URL
-          value: "postgresql://postgres:$(POSTGRES_PASSWORD)@supabase-db:5432/postgres"
+        - name: DATABASE_HOST
+          value: "supabase-db"
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_NAME
+          value: "postgres"
+        - name: DATABASE_USER
+          value: "postgres"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        # Also provide DATABASE_URL for apps that expect it
+        - name: POSTGRES_HOST
+          value: "supabase-db"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_DB
+          value: "postgres"
         - name: DATABASE_ADMIN_USER
           value: "postgres"
         - name: DATABASE_ADMIN_PASSWORD
