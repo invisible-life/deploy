@@ -1,0 +1,166 @@
+#!/bin/bash
+set -e
+
+echo "🚀 Starting Invisible Platform Deployment..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR:${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING:${NC} $1"
+}
+
+# Check if kubectl is installed
+if ! command -v kubectl &> /dev/null; then
+    print_error "kubectl is not installed. Please install kubectl first."
+    exit 1
+fi
+
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Check if we're in the right directory or use SCRIPT_DIR
+if [ -f "k8s/base/kustomization.yaml" ]; then
+    # Running from the correct directory
+    BASE_DIR="."
+elif [ -f "$SCRIPT_DIR/k8s/base/kustomization.yaml" ]; then
+    # Script called from elsewhere, use script directory
+    BASE_DIR="$SCRIPT_DIR"
+    cd "$BASE_DIR"
+else
+    print_error "Cannot find k8s/base/kustomization.yaml. Please ensure you're in the invisible-deploy directory"
+    exit 1
+fi
+
+print_status "Working directory: $(pwd)"
+
+print_status "Creating namespace..."
+kubectl create namespace invisible --dry-run=client -o yaml | kubectl apply -f -
+
+print_status "Creating secrets..."
+# Create Supabase secrets if they don't exist
+if ! kubectl get secret supabase-secrets -n invisible &> /dev/null; then
+    print_status "Creating Supabase secrets..."
+    
+    # Generate secure passwords and tokens if not provided
+    POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(openssl rand -hex 32)}
+    JWT_SECRET=${JWT_SECRET:-$(openssl rand -hex 32)}
+    ANON_KEY=${ANON_KEY:-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzUzNDc2Njk2LCJleHAiOjE3ODUwMTI2OTZ9.mw3T0SbIczmTs9JIg0xS3JLsLlsn4ABtNLwtq90PRzM"}
+    SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE3NTM0NzY2OTYsImV4cCI6MTc4NTAxMjY5Nn0.C9HpOUpksBk5n-1cpLC22hrXM47Qq30S4474l13mHgQ"}
+    
+    kubectl create secret generic supabase-secrets \
+        --from-literal=POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
+        --from-literal=JWT_SECRET=$JWT_SECRET \
+        --from-literal=ANON_KEY=$ANON_KEY \
+        --from-literal=SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY \
+        -n invisible
+else
+    print_warning "Supabase secrets already exist, skipping..."
+fi
+
+# Create app secrets if they don't exist
+if ! kubectl get secret app-secrets -n invisible &> /dev/null; then
+    print_status "Creating app secrets..."
+    
+    CREDENTIALS_ENCRYPTION_KEY=${CREDENTIALS_ENCRYPTION_KEY:-$(openssl rand -hex 32)}
+    
+    kubectl create secret generic app-secrets \
+        --from-literal=CREDENTIALS_ENCRYPTION_KEY=$CREDENTIALS_ENCRYPTION_KEY \
+        -n invisible
+else
+    print_warning "App secrets already exist, skipping..."
+fi
+
+# Create Docker Hub secret if needed
+if ! kubectl get secret dockerhub-secret -n invisible &> /dev/null; then
+    if [ -n "$DOCKER_USERNAME" ] && [ -n "$DOCKER_PASSWORD" ]; then
+        print_status "Creating Docker Hub secret..."
+        kubectl create secret docker-registry dockerhub-secret \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username=$DOCKER_USERNAME \
+            --docker-password=$DOCKER_PASSWORD \
+            -n invisible
+    else
+        print_warning "DOCKER_USERNAME and DOCKER_PASSWORD not set, skipping Docker Hub secret creation"
+        print_warning "Private images may fail to pull"
+    fi
+else
+    print_warning "Docker Hub secret already exists, skipping..."
+fi
+
+print_status "Applying Kubernetes manifests..."
+
+# Apply base configuration
+print_status "Applying base configuration..."
+kubectl apply -k k8s/base/
+
+# Wait for critical services
+print_status "Waiting for PostgreSQL to be ready..."
+# First wait for pod to exist
+while ! kubectl get pods -l app.kubernetes.io/name=supabase-postgres -n invisible 2>/dev/null | grep -q supabase-postgres; do
+    echo -n "."
+    sleep 2
+done
+echo ""
+
+# Then wait for it to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=supabase-postgres -n invisible --timeout=300s || {
+    print_error "PostgreSQL failed to start"
+    print_status "Pod status:"
+    kubectl get pods -l app.kubernetes.io/name=supabase-postgres -n invisible
+    print_status "Pod logs:"
+    kubectl logs -l app.kubernetes.io/name=supabase-postgres -n invisible --tail=50
+    exit 1
+}
+
+print_status "Waiting for ETL to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=invisible-etl -n invisible --timeout=300s || {
+    print_error "ETL failed to start"
+    kubectl logs -l app.kubernetes.io/name=invisible-etl -n invisible --tail=50
+    exit 1
+}
+
+print_status "Waiting for Auth service to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=supabase-auth -n invisible --timeout=300s || {
+    print_error "Auth service failed to start"
+    kubectl logs -l app.kubernetes.io/name=supabase-auth -n invisible --tail=50
+    exit 1
+}
+
+# Check all deployments
+print_status "Checking deployment status..."
+kubectl get deployments -n invisible
+
+# Show all pods
+print_status "All pods:"
+kubectl get pods -n invisible
+
+# Show services
+print_status "All services:"
+kubectl get services -n invisible
+
+print_status "✅ Deployment complete!"
+print_status ""
+print_status "To check the status of your deployment:"
+print_status "  kubectl get pods -n invisible"
+print_status ""
+print_status "To view logs for a specific service:"
+print_status "  kubectl logs -l app.kubernetes.io/name=<service-name> -n invisible"
+print_status ""
+print_status "To access the services:"
+print_status "  - PostgreSQL: supabase-db:5432"
+print_status "  - Kong API Gateway: supabase-kong:8000"
+print_status "  - ETL Service: invisible-etl:4001"
+print_status "  - API Service: invisible-api:4300"
