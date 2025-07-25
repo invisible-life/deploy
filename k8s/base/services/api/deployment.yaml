@@ -26,7 +26,7 @@ spec:
           - |
             export DATABASE_URL="postgresql://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres"
             export POSTGRES_URL="$DATABASE_URL"
-            npm start
+            node dist/server.js
         ports:
         - containerPort: 4300
           name: http
