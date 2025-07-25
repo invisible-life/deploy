@@ -6,6 +6,7 @@ namespace: invisible
 resources:
   - postgres/
   - auth/
+  - kong/
 
 # Common labels
 commonLabels:

@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-kong
+  labels:
+    app.kubernetes.io/name: supabase-kong
+    app.kubernetes.io/component: api-gateway
+    app.kubernetes.io/part-of: supabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: supabase-kong
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: supabase-kong
+        app.kubernetes.io/component: api-gateway
+        app.kubernetes.io/part-of: supabase
+    spec:
+      initContainers:
+      - name: kong-config-init
+        image: busybox:1.35
+        env:
+        - name: ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SERVICE_ROLE_KEY
+        command:
+          - sh
+          - -c
+          - |
+            cp /tmp/kong-template/kong.yml /var/lib/kong/kong.yml
+            sed -i "s/\${ANON_KEY}/$ANON_KEY/g" /var/lib/kong/kong.yml
+            sed -i "s/\${SERVICE_ROLE_KEY}/$SERVICE_ROLE_KEY/g" /var/lib/kong/kong.yml
+        volumeMounts:
+        - name: kong-config-template
+          mountPath: /tmp/kong-template
+        - name: kong-config
+          mountPath: /var/lib/kong
+      containers:
+      - name: kong
+        image: kong:3.7
+        ports:
+        - containerPort: 8000
+          name: proxy
+        - containerPort: 8443
+          name: proxy-ssl
+        env:
+        - name: KONG_DATABASE
+          value: "off"
+        - name: ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SERVICE_ROLE_KEY
+        - name: KONG_DECLARATIVE_CONFIG
+          value: "/var/lib/kong/kong.yml"
+        - name: KONG_DNS_ORDER
+          value: "LAST,A,CNAME"
+        - name: KONG_PLUGINS
+          value: "request-transformer,cors,key-auth,acl,basic-auth"
+        - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
+          value: "160k"
+        - name: KONG_NGINX_PROXY_PROXY_BUFFERS
+          value: "64 160k"
+        - name: KONG_LOG_LEVEL
+          value: "info"
+        volumeMounts:
+        - name: kong-config
+          mountPath: /var/lib/kong
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      volumes:
+      - name: kong-config-template
+        configMap:
+          name: supabase-kong-config
+      - name: kong-config
+        emptyDir: {}
