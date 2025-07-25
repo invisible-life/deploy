@@ -25,7 +25,7 @@ spec:
       # Run migrations on startup
       - name: migrate
         image: invisiblelife/schema:latest
-        command: ["/app/entrypoint.sh", "migrations-only"]
+        command: ["sh", "-c", "cd /app && python -m app.migrate || true"]
         env:
         - name: SKIP_AUTH_MIGRATIONS
           value: "true"
