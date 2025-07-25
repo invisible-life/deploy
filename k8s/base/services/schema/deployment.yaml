@@ -18,11 +18,19 @@ spec:
         app.kubernetes.io/component: schema
     spec:
       initContainers:
+      # Wait for ETL to be ready
+      - name: wait-for-etl
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z invisible-etl 4001; do echo "Waiting for ETL..."; sleep 2; done; echo "ETL is ready"']
       # Run migrations on startup
       - name: migrate
         image: invisiblelife/schema:latest
         command: ["/app/entrypoint.sh", "migrations-only"]
         env:
+        - name: SKIP_AUTH_MIGRATIONS
+          value: "true"
+        - name: SQLMESH_NO_UI
+          value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT
@@ -43,6 +51,8 @@ spec:
         - containerPort: 8000
           name: http
         env:
+        - name: SQLMESH_NO_UI
+          value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT
