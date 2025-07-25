@@ -25,12 +25,8 @@ spec:
       # Run migrations on startup
       - name: migrate
         image: invisiblelife/schema:latest
-        command: ["sh", "-c", "cd /app && python -m app.migrate || true"]
+        command: ["/app/entrypoint.sh", "migrations-only"]
         env:
-        - name: SKIP_AUTH_MIGRATIONS
-          value: "true"
-        - name: SQLMESH_NO_UI
-          value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT

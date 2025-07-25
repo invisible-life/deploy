@@ -5,6 +5,7 @@ namespace: invisible
 
 resources:
   - postgres/
+  - auth/
 
 # Common labels
 commonLabels:
