@@ -20,13 +20,6 @@ spec:
       containers:
       - name: api
         image: invisiblelife/api:latest
-        command:
-          - sh
-          - -c
-          - |
-            export DATABASE_URL="postgresql://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres"
-            export POSTGRES_URL="$DATABASE_URL"
-            node dist/server.js
         ports:
         - containerPort: 4300
           name: http
@@ -35,10 +28,23 @@ spec:
           value: "production"
         - name: PORT
           value: "4300"
-        - name: IS_DOCKER
-          value: "true"
         # Database
         - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_HOST
+          value: "supabase-db"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "postgres"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_URL
+          value: "postgresql://postgres@supabase-db:5432/postgres"
+        - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
               name: supabase-secrets
