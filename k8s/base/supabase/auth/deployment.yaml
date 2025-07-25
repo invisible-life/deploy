@@ -22,12 +22,33 @@ spec:
       - name: wait-for-db
         image: busybox:1.35
         command: ['sh', '-c', 'until nc -z supabase-db 5432; do echo "Waiting for database..."; sleep 2; done']
+      - name: create-auth-schema
+        image: postgres:15-alpine
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        command: 
+          - sh
+          - -c
+          - |
+            psql -h supabase-db -U postgres -d postgres -c "CREATE SCHEMA IF NOT EXISTS auth;"
+            psql -h supabase-db -U postgres -d postgres -c "GRANT ALL ON SCHEMA auth TO postgres;"
       containers:
       - name: auth
         image: supabase/gotrue:v2.158.1
         ports:
         - containerPort: 9999
           name: http
+        command:
+          - sh
+          - -c
+          - |
+            export DATABASE_URL="postgres://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres?search_path=auth"
+            export GOTRUE_DB_DATABASE_URL="$DATABASE_URL"
+            /usr/local/bin/auth
         env:
         # Database
         - name: POSTGRES_PASSWORD
@@ -41,10 +62,6 @@ spec:
           value: "postgres"
         - name: GOTRUE_DB_DRIVER
           value: "postgres"
-        - name: DATABASE_URL
-          value: "postgres://postgres:your-super-secret-jwt-token-with-at-least-32-characters-long@supabase-db:5432/postgres?search_path=auth"
-        - name: GOTRUE_DB_DATABASE_URL
-          value: "postgres://postgres:your-super-secret-jwt-token-with-at-least-32-characters-long@supabase-db:5432/postgres?search_path=auth"
         
         # Auth settings
         - name: GOTRUE_API_HOST
