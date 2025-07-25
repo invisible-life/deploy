@@ -43,8 +43,6 @@ spec:
           value: postgres
         - name: PGDATA
           value: /var/lib/postgresql/data
-        - name: POSTGRES_HOST
-          value: /var/run/postgresql
         - name: PGPORT
           value: "5432"
         - name: POSTGRES_PORT
