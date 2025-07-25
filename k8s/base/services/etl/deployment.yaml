@@ -17,6 +17,51 @@ spec:
         app.kubernetes.io/name: invisible-etl
         app.kubernetes.io/component: etl
     spec:
+      initContainers:
+      - name: setup
+        image: invisiblelife/etl:latest
+        command: ["node", "/app/dist/index.js", "setup"]
+        env:
+        - name: DATABASE_HOST
+          value: "supabase-db"
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_NAME
+          value: "postgres"
+        - name: DATABASE_USER
+          value: "postgres"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: DATABASE_URL
+          value: "postgresql://postgres@supabase-db:5432/postgres"
+        - name: POSTGRES_HOST
+          value: "supabase-db"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_DB
+          value: "postgres"
+        - name: DATABASE_ADMIN_USER
+          value: "postgres"
+        - name: DATABASE_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
       containers:
       - name: etl
         image: invisiblelife/etl:latest
