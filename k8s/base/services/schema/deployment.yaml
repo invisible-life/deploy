@@ -22,24 +22,6 @@ spec:
       - name: wait-for-etl
         image: busybox:1.35
         command: ['sh', '-c', 'until nc -z invisible-etl 4001; do echo "Waiting for ETL..."; sleep 2; done; echo "ETL is ready"']
-      # Run migrations on startup
-      - name: migrate
-        image: invisiblelife/schema:latest
-        command: ["/app/entrypoint.sh", "migrations-only"]
-        env:
-        - name: POSTGRES_HOST
-          value: "supabase-db"
-        - name: POSTGRES_PORT
-          value: "5432"
-        - name: POSTGRES_USER
-          value: "postgres"
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: supabase-secrets
-              key: POSTGRES_PASSWORD
-        - name: POSTGRES_DATABASE
-          value: "postgres"
       containers:
       - name: schema
         image: invisiblelife/schema:latest
@@ -47,7 +29,7 @@ spec:
         - containerPort: 8000
           name: http
         env:
-        - name: SQLMESH_NO_UI
+        - name: SKIP_SQLMESH_UI
           value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
