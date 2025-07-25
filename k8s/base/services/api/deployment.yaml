@@ -20,6 +20,13 @@ spec:
       containers:
       - name: api
         image: invisiblelife/api:latest
+        command:
+          - sh
+          - -c
+          - |
+            export DATABASE_URL="postgresql://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres"
+            export POSTGRES_URL="$DATABASE_URL"
+            node server.js
         ports:
         - containerPort: 4300
           name: http
@@ -36,10 +43,6 @@ spec:
             secretKeyRef:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
-        - name: DATABASE_URL
-          value: "postgresql://postgres:your-super-secret-jwt-token-with-at-least-32-characters-long@supabase-db:5432/postgres"
-        - name: POSTGRES_URL
-          value: "postgresql://postgres:your-super-secret-jwt-token-with-at-least-32-characters-long@supabase-db:5432/postgres"
         # Supabase
         - name: NEXT_PUBLIC_SUPABASE_URL
           value: "http://supabase-kong:8000"
