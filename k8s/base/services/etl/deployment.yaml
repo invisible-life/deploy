@@ -42,6 +42,11 @@ spec:
             secretKeyRef:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
         # Construct DATABASE_URL - ETL seems to need this specific variable
         - name: DATABASE_URL
           value: "postgresql://postgres@supabase-db:5432/postgres"
