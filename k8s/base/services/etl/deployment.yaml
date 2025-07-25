@@ -42,7 +42,10 @@ spec:
             secretKeyRef:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
-        # Also provide DATABASE_URL for apps that expect it
+        # Construct DATABASE_URL - ETL seems to need this specific variable
+        - name: DATABASE_URL
+          value: "postgresql://postgres@supabase-db:5432/postgres"
+        # Also provide individual components
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT
