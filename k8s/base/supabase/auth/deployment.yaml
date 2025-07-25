@@ -18,6 +18,10 @@ spec:
         app.kubernetes.io/component: auth
         app.kubernetes.io/part-of: supabase
     spec:
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z supabase-db 5432; do echo "Waiting for database..."; sleep 2; done']
       containers:
       - name: auth
         image: supabase/gotrue:v2.158.1
@@ -26,14 +30,21 @@ spec:
           name: http
         env:
         # Database
-        - name: DATABASE_URL
-          value: "postgresql://postgres@supabase-db:5432/postgres?search_path=auth"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
         - name: DB_NAMESPACE
           value: "auth"
-        - name: GOTRUE_DB_DATABASE_URL
-          value: "postgresql://postgres@supabase-db:5432/postgres?search_path=auth"
         - name: DB_DRIVER
           value: "postgres"
+        - name: GOTRUE_DB_DRIVER
+          value: "postgres"
+        - name: DATABASE_URL
+          value: "postgres://postgres:your-super-secret-jwt-token-with-at-least-32-characters-long@supabase-db:5432/postgres?search_path=auth"
+        - name: GOTRUE_DB_DATABASE_URL
+          value: "postgres://postgres:your-super-secret-jwt-token-with-at-least-32-characters-long@supabase-db:5432/postgres?search_path=auth"
         
         # Auth settings
         - name: GOTRUE_API_HOST
@@ -86,12 +97,6 @@ spec:
         - name: GOTRUE_RATE_LIMIT_EMAIL_SENT
           value: "3600"
         
-        # Database password
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: supabase-secrets
-              key: POSTGRES_PASSWORD
         
         livenessProbe:
           httpGet:

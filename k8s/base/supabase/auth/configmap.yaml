@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-auth-config
+data:
+  database-url.sh: |
+    #!/bin/sh
+    echo "postgresql://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres?search_path=auth"
