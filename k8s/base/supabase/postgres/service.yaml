@@ -15,3 +15,4 @@ spec:
     name: postgres
   selector:
     app.kubernetes.io/name: supabase-postgres
+    app.kubernetes.io/component: database
