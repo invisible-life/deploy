@@ -236,8 +236,29 @@ print_status ""
 print_status "To view logs for a specific service:"
 print_status "  kubectl logs -l app.kubernetes.io/name=<service-name> -n invisible"
 print_status ""
-print_status "To access the services:"
-print_status "  - PostgreSQL: supabase-db:5432"
-print_status "  - Kong API Gateway: supabase-kong:8000"
-print_status "  - ETL Service: invisible-etl:4001"
-print_status "  - API Service: invisible-api:4300"
+
+# Environment-specific access instructions
+case $ENVIRONMENT in
+    dev)
+        print_status "To access the services locally:"
+        print_status "  - UI Hub: http://hub.invisible.local"
+        print_status "  - UI Chat: http://chat.invisible.local"
+        print_status "  - API: http://api.invisible.local"
+        print_status ""
+        print_status "Make sure to add these to /etc/hosts pointing to 127.0.0.1"
+        ;;
+    production)
+        print_status "To configure production access:"
+        print_status "  Option 1 (with domain): ./scripts/configure-access.sh domain your-domain.com"
+        print_status "  Option 2 (IP:PORT):     ./scripts/configure-access.sh nodeport"
+        print_status ""
+        print_status "Then redeploy with: ./setup.sh production"
+        ;;
+    *)
+        print_status "To access the services:"
+        print_status "  - PostgreSQL: supabase-db:5432"
+        print_status "  - Kong API Gateway: supabase-kong:8000"
+        print_status "  - ETL Service: invisible-etl:4001"
+        print_status "  - API Service: invisible-api:4300"
+        ;;
+esac

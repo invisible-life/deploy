@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-hub
+  namespace: invisible
+spec:
+  template:
+    spec:
+      containers:
+      - name: ui-hub
+        env:
+        # Override with working values for local dev
+        - name: VITE_SUPABASE_URL
+          value: "http://localhost:8000/api"
+        - name: VITE_SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: VITE_API_URL
+          value: "http://localhost:8000/services/api"

@@ -4,9 +4,8 @@ metadata:
   name: invisible-ingress
   namespace: invisible
   annotations:
-    # Traefik annotations (k3s default)
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
+    # Traefik will handle this automatically
+    kubernetes.io/ingress.class: traefik
 spec:
   rules:
   # Supabase Studio & API

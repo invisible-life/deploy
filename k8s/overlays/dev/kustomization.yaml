@@ -5,6 +5,7 @@ namespace: invisible
 
 resources:
   - ../../base
+  - ingress.yaml
 
 # Development-specific patches
 patches:

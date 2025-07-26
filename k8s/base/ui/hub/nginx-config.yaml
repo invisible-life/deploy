@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ui-hub-nginx-config
+data:
+  default.conf: |
+    server {
+      listen 80;
+      server_name localhost;
+
+      root /usr/share/nginx/html;
+      index index.html;
+
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+
+      # Inject env-config.js into index.html
+      location = /index.html {
+        sub_filter '</head>' '<script src="/env-config.js"></script></head>';
+        sub_filter_once on;
+        try_files $uri =404;
+      }
+
+      # Optional: Add headers to prevent caching issues
+      location ~* \.(?:html|json)$ {
+        expires -1;
+        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+      }
+    }

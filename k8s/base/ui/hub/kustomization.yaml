@@ -4,3 +4,11 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
+  - env-config.yaml
+  - nginx-config.yaml
+
+patches:
+  - path: env-config-patch.yaml
+    target:
+      kind: Deployment
+      name: ui-hub

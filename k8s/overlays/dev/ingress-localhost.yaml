@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: localhost-ingress
+  namespace: invisible
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: supabase-kong
+            port:
+              number: 8000
+      - path: /services/api
+        pathType: Prefix
+        backend:
+          service:
+            name: invisible-api
+            port:
+              number: 4300
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ui-hub
+            port:
+              number: 80
