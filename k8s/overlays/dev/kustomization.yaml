@@ -8,7 +8,7 @@ resources:
 
 # Development-specific patches
 patches:
-  # Reduce resource requests for dev
+  # Reduce resource requests for dev (but keep Kong higher)
   - target:
       kind: Deployment
       name: ".*"
@@ -22,6 +22,21 @@ patches:
           limits:
             cpu: 500m
             memory: 512Mi
+  
+  # Kong needs more memory
+  - target:
+      kind: Deployment
+      name: supabase-kong
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
 
   # Use latest tags for development
   - target:

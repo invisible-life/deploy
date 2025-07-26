@@ -136,6 +136,7 @@ fi
 # Create app secrets if they don't exist
 if ! kubectl get secret app-secrets -n invisible &> /dev/null; then
     print_status "Creating app secrets..."
+    print_warning "Consider running scripts/generate-secrets.sh for proper secret generation"
     
     CREDENTIALS_ENCRYPTION_KEY=${CREDENTIALS_ENCRYPTION_KEY:-$(openssl rand -hex 32)}
     

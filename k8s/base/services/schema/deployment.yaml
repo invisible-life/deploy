@@ -28,6 +28,8 @@ spec:
         ports:
         - containerPort: 8000
           name: http
+        command: ["/bin/sh"]
+        args: ["-c", "cd /app && python scripts/migrations.py && sqlmesh migrate && sqlmesh plan --auto-apply && echo 'Schema migrations complete. Keeping container alive...' && tail -f /dev/null"]
         env:
         - name: SKIP_SQLMESH_UI
           value: "true"
@@ -44,6 +46,8 @@ spec:
               key: POSTGRES_PASSWORD
         - name: POSTGRES_DATABASE
           value: "postgres"
+        - name: DATABASE_URL
+          value: "postgresql://postgres@supabase-db:5432/postgres"
         livenessProbe:
           httpGet:
             path: /

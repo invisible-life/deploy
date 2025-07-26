@@ -139,10 +139,12 @@ kubectl create secret generic supabase-secrets \
 
 # Create application secrets
 echo -e "${YELLOW}Creating application secrets...${NC}"
+# Use provided DOCKER_HUB_TOKEN or empty string
+DOCKER_HUB_TOKEN="${DOCKER_HUB_TOKEN:-}"
 kubectl create secret generic app-secrets \
   --namespace=invisible \
   --from-literal=CREDENTIALS_ENCRYPTION_KEY="$CREDENTIALS_ENCRYPTION_KEY" \
-  --from-literal=DOCKER_HUB_TOKEN="" \
+  --from-literal=DOCKER_HUB_TOKEN="$DOCKER_HUB_TOKEN" \
   --from-literal=DOCKER_HUB_USERNAME="invisiblelife" \
   --dry-run=client -o yaml | kubectl apply -f -
 
