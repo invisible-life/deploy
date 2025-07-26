@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service  
+metadata:
+  name: ui-hub-debug
+  namespace: invisible
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: debug-pod
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-pod
+  namespace: invisible
+  labels:
+    app.kubernetes.io/name: debug-pod
+spec:
+  containers:
+  - name: debug
+    image: python:3.9-slim
+    command: ["python", "-m", "http.server", "8080"]
+    workingDir: /app
+    volumeMounts:
+    - name: html
+      mountPath: /app
+  volumes:
+  - name: html
+    emptyDir: {}

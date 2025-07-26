@@ -12,6 +12,9 @@ spec:
       - name: nginx-config
         configMap:
           name: ui-hub-nginx-config
+      - name: env-fix
+        configMap:
+          name: ui-hub-env-fix
       containers:
       - name: ui-hub
         volumeMounts:
@@ -21,3 +24,9 @@ spec:
         - name: nginx-config
           mountPath: /etc/nginx/conf.d/default.conf
           subPath: default.conf
+        - name: env-fix
+          mountPath: /usr/share/nginx/html/env-fix.js
+          subPath: env-fix.js
+        - name: env-fix
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html

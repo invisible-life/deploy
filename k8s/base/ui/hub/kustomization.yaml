@@ -6,6 +6,7 @@ resources:
   - service.yaml
   - env-config.yaml
   - nginx-config.yaml
+  - env-fix.yaml
 
 patches:
   - path: env-config-patch.yaml

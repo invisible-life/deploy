@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ui-hub-env-fix
+data:
+  env-fix.js: |
+    // Fix for missing environment variables
+    window.process = window.process || { env: {} };
+    window.process.env.VITE_SUPABASE_URL = window.location.origin + '/api';
+    window.process.env.VITE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzUzNDc2Njk2LCJleHAiOjE3ODUwMTI2OTZ9.mw3T0SbIczmTs9JIg0xS3JLsLlsn4ABtNLwtq90PRzM';
+    window.process.env.VITE_API_URL = window.location.origin + '/services/api';
+    
+    // Also set on import.meta.env for Vite
+    if (!window.import) window.import = {};
+    if (!window.import.meta) window.import.meta = {};
+    if (!window.import.meta.env) window.import.meta.env = {};
+    window.import.meta.env.VITE_SUPABASE_URL = window.location.origin + '/api';
+    window.import.meta.env.VITE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzUzNDc2Njk2LCJleHAiOjE3ODUwMTI2OTZ9.mw3T0SbIczmTs9JIg0xS3JLsLlsn4ABtNLwtq90PRzM';
+    window.import.meta.env.VITE_API_URL = window.location.origin + '/services/api';
+  index.html: |
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Control Panel Implementation</title>
+        <script src="/env-fix.js"></script>
+        <script type="module" crossorigin src="/assets/index-CIDFRG95.js"></script>
+        <link rel="stylesheet" crossorigin href="/assets/index-BAEFkHy6.css">
+      </head>
+      <body>
+        <div id="root"></div>
+      </body>
+    </html>
