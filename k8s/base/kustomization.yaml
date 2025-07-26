@@ -10,4 +10,3 @@ resources:
 # Common labels for all resources
 commonLabels:
   app.kubernetes.io/managed-by: kustomize
-  environment: base

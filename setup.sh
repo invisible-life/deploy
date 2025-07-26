@@ -3,7 +3,12 @@ set -e
 
 # Script usage
 usage() {
-    echo "Usage: $0 [OPTIONS]"
+    echo "Usage: $0 [OPTIONS] [environment]"
+    echo ""
+    echo "Environments:"
+    echo "  dev          Deploy development environment (default)"
+    echo "  production   Deploy production environment"
+    echo "  base         Deploy base configuration only"
     echo ""
     echo "Options:"
     echo "  --docker-username <username>   Docker Hub username"
@@ -11,12 +16,17 @@ usage() {
     echo "  --help                         Show this help message"
     echo ""
     echo "Example:"
-    echo "  $0 --docker-username myuser --docker-password mytoken"
+    echo "  $0                                          # Deploy dev environment"
+    echo "  $0 production                               # Deploy production"
+    echo "  $0 --docker-username myuser --docker-password mytoken dev"
     echo ""
     echo "Note: Docker credentials can also be set via environment variables:"
     echo "  DOCKER_USERNAME and DOCKER_PASSWORD"
     exit 1
 }
+
+# Default environment
+ENVIRONMENT="dev"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -32,6 +42,10 @@ while [[ $# -gt 0 ]]; do
         --help)
             usage
             ;;
+        base|dev|production)
+            ENVIRONMENT="$1"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             usage
@@ -39,7 +53,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo "🚀 Starting Invisible Platform Deployment..."
+echo "🚀 Starting Invisible Platform Deployment - $ENVIRONMENT environment"
 
 # Colors for output
 RED='\033[0;31m'
@@ -92,9 +106,20 @@ print_status "Creating secrets..."
 if ! kubectl get secret supabase-secrets -n invisible &> /dev/null; then
     print_status "Creating Supabase secrets..."
     
-    # Generate secure passwords and tokens if not provided
-    POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(openssl rand -hex 32)}
-    JWT_SECRET=${JWT_SECRET:-$(openssl rand -hex 32)}
+    # Use environment-specific values if available
+    case $ENVIRONMENT in
+        production)
+            # Production should use strong, unique passwords
+            POSTGRES_PASSWORD=${PROD_POSTGRES_PASSWORD:-$(openssl rand -hex 32)}
+            JWT_SECRET=${PROD_JWT_SECRET:-$(openssl rand -hex 32)}
+            ;;
+        *)
+            # Dev/base can use default passwords
+            POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(openssl rand -hex 32)}
+            JWT_SECRET=${JWT_SECRET:-$(openssl rand -hex 32)}
+            ;;
+    esac
+    
     ANON_KEY=${ANON_KEY:-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzUzNDc2Njk2LCJleHAiOjE3ODUwMTI2OTZ9.mw3T0SbIczmTs9JIg0xS3JLsLlsn4ABtNLwtq90PRzM"}
     SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE3NTM0NzY2OTYsImV4cCI6MTc4NTAxMjY5Nn0.C9HpOUpksBk5n-1cpLC22hrXM47Qq30S4474l13mHgQ"}
     
@@ -126,7 +151,7 @@ if ! kubectl get secret dockerhub-secret -n invisible &> /dev/null; then
     if [ -n "$DOCKER_USERNAME" ] && [ -n "$DOCKER_PASSWORD" ]; then
         print_status "Creating Docker Hub secret..."
         kubectl create secret docker-registry dockerhub-secret \
-            --docker-server=https://index.docker.io/v1/ \
+            --docker-server=docker.io \
             --docker-username=$DOCKER_USERNAME \
             --docker-password=$DOCKER_PASSWORD \
             -n invisible
@@ -140,26 +165,38 @@ fi
 
 print_status "Applying Kubernetes manifests..."
 
-# Apply dev configuration (matching ArgoCD)
-print_status "Applying dev configuration..."
-kubectl apply -k k8s/overlays/dev/
+# Apply the appropriate configuration
+case $ENVIRONMENT in
+    base)
+        print_status "Applying base configuration..."
+        kubectl apply -k k8s/base/
+        ;;
+    dev)
+        print_status "Applying development configuration..."
+        kubectl apply -k k8s/overlays/dev/
+        ;;
+    production)
+        print_status "Applying production configuration..."
+        kubectl apply -k k8s/overlays/production/
+        ;;
+esac
 
 # Wait for critical services
 print_status "Waiting for PostgreSQL to be ready..."
 # First wait for pod to exist
-while ! kubectl get pods -l app.kubernetes.io/name=supabase-postgres -n invisible 2>/dev/null | grep -q supabase-postgres; do
+while ! kubectl get pods -l app.kubernetes.io/component=database -n invisible 2>/dev/null | grep -q postgres; do
     echo -n "."
     sleep 2
 done
 echo ""
 
 # Then wait for it to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=supabase-postgres -n invisible --timeout=300s || {
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=database -n invisible --timeout=300s || {
     print_error "PostgreSQL failed to start"
     print_status "Pod status:"
-    kubectl get pods -l app.kubernetes.io/name=supabase-postgres -n invisible
+    kubectl get pods -l app.kubernetes.io/component=database -n invisible
     print_status "Pod logs:"
-    kubectl logs -l app.kubernetes.io/name=supabase-postgres -n invisible --tail=50
+    kubectl logs -l app.kubernetes.io/component=database -n invisible --tail=50
     exit 1
 }
 
@@ -191,6 +228,7 @@ kubectl get services -n invisible
 
 print_status "✅ Deployment complete!"
 print_status ""
+print_status "Environment: $ENVIRONMENT"
 print_status "To check the status of your deployment:"
 print_status "  kubectl get pods -n invisible"
 print_status ""
