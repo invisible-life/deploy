@@ -1,22 +1,21 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: invisible-schema
+  name: invisible-schema-migrate
   labels:
     app.kubernetes.io/name: invisible-schema
     app.kubernetes.io/component: schema
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: invisible-schema
-      app.kubernetes.io/component: schema
+  ttlSecondsAfterFinished: 300  # Clean up job after 5 minutes
   template:
     metadata:
       labels:
         app.kubernetes.io/name: invisible-schema
         app.kubernetes.io/component: schema
     spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: dockerhub-secret
       initContainers:
       # Wait for ETL to be ready
       - name: wait-for-etl
@@ -30,16 +29,13 @@ spec:
         - |
           echo "Running database migrations..."
           cd /app
+          export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
+          echo "Database URL: postgresql://${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
           python scripts/migrations.py
           sqlmesh migrate
           sqlmesh plan --auto-apply
           echo "Migrations complete. Exiting."
-        ports:
-        - containerPort: 8000
-          name: http
         env:
-        - name: SKIP_SQLMESH_UI
-          value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT
@@ -53,18 +49,6 @@ spec:
               key: POSTGRES_PASSWORD
         - name: POSTGRES_DATABASE
           value: "postgres"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8000
-          initialDelaySeconds: 60
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
         resources:
           requests:
             cpu: 100m
