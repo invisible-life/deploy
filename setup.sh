@@ -140,9 +140,9 @@ fi
 
 print_status "Applying Kubernetes manifests..."
 
-# Apply base configuration
-print_status "Applying base configuration..."
-kubectl apply -k k8s/base/
+# Apply dev configuration (matching ArgoCD)
+print_status "Applying dev configuration..."
+kubectl apply -k k8s/overlays/dev/
 
 # Wait for critical services
 print_status "Waiting for PostgreSQL to be ready..."
