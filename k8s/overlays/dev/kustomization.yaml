@@ -7,6 +7,7 @@ resources:
   - ../../base
   - ingress.yaml
 
+
 # Development-specific patches
 patches:
   # Reduce resource requests for dev (but keep Kong higher)
@@ -55,6 +56,25 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/image
         value: invisiblelife/etl:latest
+
+  # Fix ui-hub environment variables for development
+  - target:
+      kind: Deployment
+      name: ui-hub
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env
+        value:
+        - name: VITE_SUPABASE_URL
+          value: "http://localhost:8000/api"
+        - name: VITE_SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: VITE_API_URL
+          value: "http://localhost:8000/services/api"
+
 
 # Development ConfigMaps
 configMapGenerator:

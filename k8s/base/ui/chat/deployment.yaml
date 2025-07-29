@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
       - name: ui-chat
-        image: invisiblelife/ui-chat:latest
+        image: invisible-ui-chat-ui:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
           name: http
