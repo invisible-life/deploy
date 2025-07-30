@@ -140,6 +140,12 @@ services:
 
       GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
       GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
+      
+      # MFA Configuration
+      GOTRUE_MFA_ENABLED: true
+      GOTRUE_MFA_TOTP_ISSUER: Invisible
+      GOTRUE_MFA_TOTP_ENABLED: true
+      GOTRUE_MFA_MAX_ENROLLED_FACTORS: 10
       # Uncomment to enable custom access token hook. Please see: https://supabase.com/docs/guides/auth/auth-hooks for full list of hooks and additional details about custom_access_token_hook
 
       # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: "true"

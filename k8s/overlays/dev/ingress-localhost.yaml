@@ -24,6 +24,13 @@ spec:
             name: invisible-api
             port:
               number: 4300
+      - path: /chat
+        pathType: Prefix
+        backend:
+          service:
+            name: ui-chat
+            port:
+              number: 80
       - path: /
         pathType: Prefix
         backend:
