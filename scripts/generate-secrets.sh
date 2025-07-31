@@ -176,7 +176,11 @@ LOGFLARE_PRIVATE_ACCESS_TOKEN=$LOGFLARE_PRIVATE_TOKEN
 
 # Supabase URLs (update for your domain)
 SUPABASE_URL=http://localhost:8000
+SUPABASE_PUBLIC_URL=http://localhost:8000
 SUPABASE_ANON_KEY=$ANON_KEY
+
+# API URLs (update for your domain)
+API_PUBLIC_URL=http://localhost:4300
 EOF
 
 echo -e "${GREEN}✅ Secrets generated successfully!${NC}"

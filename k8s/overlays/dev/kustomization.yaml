@@ -48,6 +48,16 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/image
         value: invisiblelife/api:latest
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: API_PUBLIC_URL
+          value: "http://localhost:8000/services/api"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SUPABASE_PUBLIC_URL
+          value: "http://localhost:8000/api"
   
   - target:
       kind: Deployment
