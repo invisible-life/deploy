@@ -69,13 +69,19 @@ spec:
         - name: GOTRUE_API_PORT
           value: "9999"
         - name: API_EXTERNAL_URL
-          value: "http://localhost"
+          valueFrom:
+            configMapKeyRef:
+              name: url-config
+              key: SUPABASE_PUBLIC_URL
         - name: GOTRUE_SITE_URL
-          value: "http://localhost"
+          valueFrom:
+            configMapKeyRef:
+              name: url-config
+              key: SITE_URL
         
-        # JWT
+        # JWT - Extended session times
         - name: GOTRUE_JWT_EXP
-          value: "3600"
+          value: "259200"  # 3 days (72 hours)
         - name: GOTRUE_JWT_SECRET
           valueFrom:
             secretKeyRef:
@@ -83,6 +89,16 @@ spec:
               key: JWT_SECRET
         - name: GOTRUE_JWT_DEFAULT_GROUP_NAME
           value: "authenticated"
+        
+        # Token expiry settings - Make tokens last much longer
+        - name: GOTRUE_MAILER_OTP_EXP
+          value: "3600"  # OTP/Magic link valid for 1 hour (3600 seconds)
+        - name: GOTRUE_PASSWORD_MIN_LENGTH
+          value: "6"
+        - name: GOTRUE_SESSIONS_TIMEBOX
+          value: "259200s"  # Session refresh timebox: 3 days (needs 's' suffix)
+        - name: GOTRUE_SESSIONS_INACTIVITY_TIMEOUT
+          value: "604800s"  # 7 days of inactivity before logout (needs 's' suffix)
         
         # Email (using Mailpit)
         - name: GOTRUE_SMTP_HOST
@@ -114,13 +130,13 @@ spec:
         - name: GOTRUE_RATE_LIMIT_EMAIL_SENT
           value: "3600"
         
-        # MFA Configuration
+        # MFA Configuration - Temporarily disabled to allow login
         - name: GOTRUE_MFA_ENABLED
-          value: "true"
+          value: "false"
         - name: GOTRUE_MFA_TOTP_ISSUER
           value: "Invisible"
         - name: GOTRUE_MFA_TOTP_ENABLED
-          value: "true"
+          value: "false"
         - name: GOTRUE_MFA_MAX_ENROLLED_FACTORS
           value: "10"
         
