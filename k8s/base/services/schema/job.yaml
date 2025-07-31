@@ -24,18 +24,11 @@ spec:
       containers:
       - name: schema
         image: invisiblelife/schema:latest
-        command: ["/bin/sh", "-c"]
-        args: 
-        - |
-          echo "Running database migrations..."
-          cd /app
-          export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
-          echo "Database URL: postgresql://${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
-          python scripts/migrations.py
-          sqlmesh migrate
-          sqlmesh plan --auto-apply
-          echo "Migrations complete. Exiting."
+        # Use the entrypoint.sh script which properly updates the SQLMesh config
+        # Set SCHEMA_MIGRATIONS_ONLY to true so it exits after migrations
         env:
+        - name: SCHEMA_MIGRATIONS_ONLY
+          value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT
