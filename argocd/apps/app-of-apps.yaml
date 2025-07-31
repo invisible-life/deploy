@@ -7,6 +7,11 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    jsonPointers:
+    - /data
   source:
     repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
@@ -21,6 +26,8 @@ spec:
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+      - PruneLast=true
     retry:
       limit: 5
       backoff:

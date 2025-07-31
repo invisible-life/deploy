@@ -7,6 +7,13 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    name: supabase-secrets
+  - group: ""
+    kind: Secret
+    name: dockerhub-secret
   source:
     repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
@@ -21,6 +28,7 @@ spec:
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

@@ -139,8 +139,6 @@ if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
   
   # Kubernetes deployment
   print_info "Deploying to Kubernetes..."
-  # Pass Docker credentials to generate-secrets script
-  DOCKER_USERNAME="$DOCKER_USERNAME" DOCKER_PASSWORD="$DOCKER_PASSWORD" ./scripts/generate-secrets.sh
   
   # Install ArgoCD if not present
   if ! kubectl get namespace argocd >/dev/null 2>&1; then
@@ -152,10 +150,16 @@ if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
     kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd || true
   fi
   
-  print_info "Deploying applications with ArgoCD..."
+  # Create namespace before secrets
+  print_info "Creating namespace..."
   kubectl create namespace invisible --dry-run=client -o yaml | kubectl apply -f -
   
+  # Generate secrets AFTER namespace exists but BEFORE deploying apps
+  print_info "Generating secrets..."
+  DOCKER_USERNAME="$DOCKER_USERNAME" DOCKER_PASSWORD="$DOCKER_PASSWORD" ./scripts/generate-secrets.sh
+  
   # Apply the ArgoCD app-of-apps
+  print_info "Deploying applications with ArgoCD..."
   kubectl apply -f argocd/apps/app-of-apps.yaml
   
   print_success "ArgoCD application created!"
