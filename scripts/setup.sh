@@ -166,23 +166,22 @@ if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
   # Create override kustomization based on deployment type
   if [ "$NO_DOMAIN" = "true" ]; then
     print_info "Configuring for IP-based access..."
-    cat > /tmp/invisible-deploy/k8s/overlays/production/url-config-override.yaml <<EOF
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-configMapGenerator:
-  - name: url-config
-    behavior: replace
-    literals:
-      - API_PUBLIC_URL=http://${SERVER_IP}:30084
-      - SUPABASE_PUBLIC_URL=http://${SERVER_IP}:30082
-      - SITE_URL=http://${SERVER_IP}:30080
-      - API_EXTERNAL_URL=http://${SERVER_IP}:30082
+    # Create a patch for the URL config instead of a separate kustomization
+    cat > /tmp/invisible-deploy/k8s/overlays/production/url-config-patch.yaml <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: url-config
+data:
+  API_PUBLIC_URL: "http://${SERVER_IP}:30084"
+  SUPABASE_PUBLIC_URL: "http://${SERVER_IP}:30082"
+  SITE_URL: "http://${SERVER_IP}:30080"
+  API_EXTERNAL_URL: "http://${SERVER_IP}:30082"
 EOF
     
-    # Add the override to production kustomization
+    # Add the patch to production kustomization
     cd /tmp/invisible-deploy/k8s/overlays/production
-    kustomize edit add resource url-config-override.yaml
+    kustomize edit add patch --path url-config-patch.yaml --kind ConfigMap --name url-config
     cd /app
     
     print_success "Configured with IP-based URLs"
@@ -190,23 +189,22 @@ EOF
     echo "  Supabase URL: http://${SERVER_IP}:30082"
   else
     print_info "Configuring for domain-based access..."
-    cat > /tmp/invisible-deploy/k8s/overlays/production/url-config-override.yaml <<EOF
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-configMapGenerator:
-  - name: url-config
-    behavior: replace
-    literals:
-      - API_PUBLIC_URL=https://api.${DOMAIN}
-      - SUPABASE_PUBLIC_URL=https://api.${DOMAIN}
-      - SITE_URL=https://${DOMAIN}
-      - API_EXTERNAL_URL=https://api.${DOMAIN}
+    # Create a patch for the URL config
+    cat > /tmp/invisible-deploy/k8s/overlays/production/url-config-patch.yaml <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: url-config
+data:
+  API_PUBLIC_URL: "https://api.${DOMAIN}"
+  SUPABASE_PUBLIC_URL: "https://api.${DOMAIN}"
+  SITE_URL: "https://${DOMAIN}"
+  API_EXTERNAL_URL: "https://api.${DOMAIN}"
 EOF
     
-    # Add the override to production kustomization
+    # Add the patch to production kustomization
     cd /tmp/invisible-deploy/k8s/overlays/production
-    kustomize edit add resource url-config-override.yaml
+    kustomize edit add patch --path url-config-patch.yaml --kind ConfigMap --name url-config
     cd /app
     
     print_success "Configured with domain URLs"
