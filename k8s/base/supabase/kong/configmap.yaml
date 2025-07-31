@@ -56,15 +56,24 @@ data:
       plugins:
       - name: cors
 
-    - name: auth-v1-open-factors
+    - name: auth-v1-factors
       url: http://supabase-auth:9999/factors
       routes:
-      - name: auth-v1-open-factors
+      - name: auth-v1-factors
         strip_path: true
         paths:
         - /auth/v1/factors
       plugins:
       - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+      - name: acl
+        config:
+          hide_groups_header: true
+          allow:
+          - anon
+          - service_role
 
     - name: auth-v1-open-verify
       url: http://supabase-auth:9999/verify
@@ -77,15 +86,24 @@ data:
       - name: cors
 
 
-    - name: auth-v1-open-user
+    - name: auth-v1-user
       url: http://supabase-auth:9999/user
       routes:
-      - name: auth-v1-open-user
+      - name: auth-v1-user
         strip_path: true
         paths:
         - /auth/v1/user
       plugins:
       - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+      - name: acl
+        config:
+          hide_groups_header: true
+          allow:
+          - anon
+          - service_role
 
     - name: auth-v1
       url: http://supabase-auth:9999/
