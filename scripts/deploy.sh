@@ -91,6 +91,12 @@ kubectl apply -f argocd/apps/app-of-apps.yaml
 # Get server IP
 SERVER_IP=$(curl -s -4 ifconfig.me 2>/dev/null || echo "YOUR-SERVER-IP")
 
+# Update URL configuration with detected IP
+echo "${BLUE}Configuring URLs for IP: ${SERVER_IP}...${NC}"
+sed -i.backup "s|http://EXTERNAL_IP:30082|http://${SERVER_IP}:30082|g" k8s/base/configmaps/url-config.yaml
+sed -i "s|http://EXTERNAL_IP:30084|http://${SERVER_IP}:30084|g" k8s/base/configmaps/url-config.yaml
+sed -i "s|http://EXTERNAL_IP:30080|http://${SERVER_IP}:30080|g" k8s/base/configmaps/url-config.yaml
+
 # Get ArgoCD password
 ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
