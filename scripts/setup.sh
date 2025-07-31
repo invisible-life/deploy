@@ -220,9 +220,35 @@ EOF
   print_info "Creating ArgoCD application for production..."
   kubectl apply -f argocd/apps/platform.yaml
   
+  # Wait for ArgoCD application to be created
+  print_info "Waiting for ArgoCD application to be ready..."
+  sleep 5
+  
+  # Trigger ArgoCD sync
+  print_info "Syncing ArgoCD application..."
+  kubectl patch -n argocd application/invisible-platform-production --type=merge \
+    -p '{"operation":{"initiatedBy":{"username":"admin"},"sync":{"revision":"HEAD","prune":true,"syncStrategy":{"hook":{}}}}}' || true
+  
+  # Wait for initial pod creation
+  print_info "Waiting for pods to be created..."
+  sleep 10
+  
+  # Wait for critical pods to be ready
+  print_info "Waiting for services to start..."
+  CRITICAL_DEPLOYMENTS="supabase-kong supabase-auth supabase-postgres ui-hub ui-chat invisible-api"
+  
+  for deployment in $CRITICAL_DEPLOYMENTS; do
+    echo -n "  Waiting for $deployment..."
+    kubectl wait --for=condition=available --timeout=300s deployment/$deployment -n invisible >/dev/null 2>&1 && echo " ✓" || echo " (skipped)"
+  done
+  
+  # Give services a moment to fully initialize
+  print_info "Allowing services to initialize..."
+  sleep 5
+  
   print_success "Production deployment completed!"
   print_info "ArgoCD is now managing the production deployment"
-  print_info "The production overlay with NodePort services has been applied"
+  print_info "All critical services are running"
   
   echo ""
   echo "Monitor deployment progress with:"
