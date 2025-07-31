@@ -218,10 +218,13 @@ EOF
   print_info "Applying Kubernetes configuration..."
   kubectl apply -k /tmp/invisible-deploy/k8s/overlays/production/
   
-  print_success "ArgoCD application created!"
+  # Skip ArgoCD for now since it's configured for base, not production
+  print_success "Production deployment completed!"
+  print_info "Note: ArgoCD is installed but not managing deployments yet"
+  print_info "The production overlay with NodePort services has been applied"
+  
   echo ""
   echo "Monitor deployment progress with:"
-  echo "  kubectl get applications -n argocd"
   echo "  kubectl get pods -n invisible"
   echo ""
   echo "Once pods are running, services will be accessible at:"
