@@ -36,7 +36,8 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app.kubernetes.io/name: supabase-kong
+    app.kubernetes.io/name: supabase
+    app.kubernetes.io/component: api-gateway
   ports:
   - port: 8000
     targetPort: 8000

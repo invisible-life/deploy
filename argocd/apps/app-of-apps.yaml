@@ -1,17 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: invisible-platform
+  name: invisible-platform-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  ignoreDifferences:
-  - group: ""
-    kind: Secret
-    jsonPointers:
-    - /data
   source:
     repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
@@ -23,14 +18,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
-      allowEmpty: false
     syncOptions:
       - CreateNamespace=true
-      - RespectIgnoreDifferences=true
-      - PruneLast=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m

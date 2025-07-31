@@ -1,23 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: invisible-services
+  name: invisible-platform-prod
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  ignoreDifferences:
-  - group: ""
-    kind: Secret
-    name: app-secrets
-  - group: ""
-    kind: Secret
-    name: dockerhub-secret
   source:
     repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
-    path: k8s/base/services
+    path: k8s/overlays/production
   destination:
     server: https://kubernetes.default.svc
     namespace: invisible
@@ -28,9 +21,21 @@ spec:
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
         duration: 5s
         factor: 2
         maxDuration: 3m
+  ignoreDifferences:
+    # Ignore dynamically generated fields
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: ConfigMap
+      name: url-config
+      jsonPointers:
+        - /data
