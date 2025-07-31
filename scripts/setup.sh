@@ -139,7 +139,8 @@ if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
   
   # Kubernetes deployment
   print_info "Deploying to Kubernetes..."
-  ./scripts/generate-secrets.sh
+  # Pass Docker credentials to generate-secrets script
+  DOCKER_USERNAME="$DOCKER_USERNAME" DOCKER_PASSWORD="$DOCKER_PASSWORD" ./scripts/generate-secrets.sh
   
   # Install ArgoCD if not present
   if ! kubectl get namespace argocd >/dev/null 2>&1; then

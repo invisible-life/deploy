@@ -183,6 +183,20 @@ SUPABASE_ANON_KEY=$ANON_KEY
 API_PUBLIC_URL=http://localhost:4300
 EOF
 
+# Create Docker Hub secret if credentials are available
+if [ -n "$DOCKER_USERNAME" ] && [ -n "$DOCKER_PASSWORD" ]; then
+    echo "Creating Docker Hub secret..."
+    kubectl create secret docker-registry dockerhub-secret \
+        --docker-server=docker.io \
+        --docker-username="$DOCKER_USERNAME" \
+        --docker-password="$DOCKER_PASSWORD" \
+        -n invisible \
+        --dry-run=client -o yaml | kubectl apply -f -
+    echo -e "${GREEN}✅ Docker Hub secret created${NC}"
+else
+    echo -e "${YELLOW}⚠️  Docker Hub credentials not found. Private images may fail to pull.${NC}"
+fi
+
 echo -e "${GREEN}✅ Secrets generated successfully!${NC}"
 echo -e "${YELLOW}Secrets saved to secrets.env (DO NOT COMMIT!)${NC}"
 echo ""

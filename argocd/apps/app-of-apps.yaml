@@ -10,10 +10,10 @@ spec:
   source:
     repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
-    path: k8s/overlays/production
+    path: argocd/apps
   destination:
     server: https://kubernetes.default.svc
-    namespace: invisible
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
