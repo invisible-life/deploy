@@ -56,6 +56,16 @@ data:
       plugins:
       - name: cors
 
+    - name: auth-v1-open-factors
+      url: http://supabase-auth:9999/factors
+      routes:
+      - name: auth-v1-open-factors
+        strip_path: true
+        paths:
+        - /auth/v1/factors
+      plugins:
+      - name: cors
+
     - name: auth-v1
       url: http://supabase-auth:9999/
       routes:
