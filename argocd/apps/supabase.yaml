@@ -17,7 +17,7 @@ spec:
   source:
     repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
-    path: k8s/overlays/production
+    path: k8s/base/supabase
   destination:
     server: https://kubernetes.default.svc
     namespace: invisible

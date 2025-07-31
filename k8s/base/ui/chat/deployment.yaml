@@ -34,6 +34,11 @@ spec:
               key: ANON_KEY
         - name: VITE_CHAT_API_BASE_URL
           value: "http://invisible-api:4300"
+        # Nginx proxy configuration
+        - name: API_HOST
+          value: "invisible-api"
+        - name: API_PORT
+          value: "4300"
         livenessProbe:
           httpGet:
             path: /

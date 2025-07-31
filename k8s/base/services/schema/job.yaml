@@ -49,6 +49,8 @@ spec:
               key: POSTGRES_PASSWORD
         - name: POSTGRES_DATABASE
           value: "postgres"
+        - name: POSTGRES_DB
+          value: "postgres"
         resources:
           requests:
             cpu: 100m
