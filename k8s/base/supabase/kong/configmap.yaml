@@ -46,6 +46,16 @@ data:
       plugins:
       - name: cors
 
+    - name: auth-v1-open-otp
+      url: http://supabase-auth:9999/otp
+      routes:
+      - name: auth-v1-open-otp
+        strip_path: true
+        paths:
+        - /auth/v1/otp
+      plugins:
+      - name: cors
+
     - name: auth-v1
       url: http://supabase-auth:9999/
       routes:
