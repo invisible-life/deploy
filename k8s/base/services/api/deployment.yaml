@@ -18,6 +18,28 @@ spec:
         app.kubernetes.io/component: api
     spec:
       serviceAccountName: invisible-api
+      initContainers:
+      # Wait for schema migration job to complete before starting API
+      - name: wait-for-schema
+        image: bitnami/kubectl:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Waiting for schema migration job to complete..."
+          while true; do
+            STATUS=$(kubectl get job invisible-schema-migrate -n invisible -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || echo "")
+            if [ "$STATUS" = "True" ]; then
+              echo "Schema migration job completed successfully"
+              break
+            fi
+            FAILED=$(kubectl get job invisible-schema-migrate -n invisible -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || echo "")
+            if [ "$FAILED" = "True" ]; then
+              echo "Schema migration job failed - check job logs"
+              exit 1
+            fi
+            echo "Schema migration still running, waiting..."
+            sleep 5
+          done
       containers:
       - name: api
         image: invisiblelife/api:latest

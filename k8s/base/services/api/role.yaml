@@ -13,3 +13,6 @@ rules:
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["delete"]  # For restart functionality
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list"]  # For checking schema job completion
