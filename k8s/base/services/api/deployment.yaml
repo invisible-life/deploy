@@ -17,6 +17,7 @@ spec:
         app.kubernetes.io/name: invisible-api
         app.kubernetes.io/component: api
     spec:
+      serviceAccountName: invisible-api
       containers:
       - name: api
         image: invisiblelife/api:latest
