@@ -13,6 +13,10 @@ resources:
   # Option 2: Direct IP:PORT access (uncomment this)
   - ingress-nodeport.yaml
 
+# Strategic merge patches
+patchesStrategicMerge:
+  - api-env-patch.yaml
+
 # Production-specific patches
 patches:
   # Set production resource limits
