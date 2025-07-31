@@ -148,16 +148,31 @@ if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     
     print_info "Waiting for ArgoCD to be ready..."
-    kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
+    kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd || true
   fi
   
   print_info "Deploying applications with ArgoCD..."
   kubectl create namespace invisible --dry-run=client -o yaml | kubectl apply -f -
+  
+  # Apply the ArgoCD app-of-apps
   kubectl apply -f argocd/apps/app-of-apps.yaml
   
-  print_success "ArgoCD applications deployed! Monitor progress with:"
+  print_success "ArgoCD application created!"
+  echo ""
+  echo "Monitor deployment progress with:"
   echo "  kubectl get applications -n argocd"
   echo "  kubectl get pods -n invisible"
+  echo ""
+  echo "Once pods are running, services will be accessible at:"
+  echo "  UI Hub: http://${SERVER_IP:-localhost}:30080"
+  echo "  UI Chat: http://${SERVER_IP:-localhost}:30081"
+  echo "  API: http://${SERVER_IP:-localhost}:30082"
+  echo ""
+  echo "To access ArgoCD UI:"
+  echo "  kubectl port-forward svc/argocd-server -n argocd 8080:443"
+  echo "  Then visit https://localhost:8080"
+  echo "  Username: admin"
+  echo "  Password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d"
 else
   # Docker Compose deployment
   print_info "Using Docker Compose deployment..."

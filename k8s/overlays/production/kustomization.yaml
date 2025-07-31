@@ -11,7 +11,7 @@ resources:
   # - cert-issuer.yaml
   
   # Option 2: Direct IP:PORT access (uncomment this)
-  # - ingress-nodeport.yaml
+  - ingress-nodeport.yaml
 
 # Production-specific patches
 patches:
