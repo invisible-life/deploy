@@ -218,7 +218,7 @@ EOF
   
   # Create ArgoCD application for production
   print_info "Creating ArgoCD application for production..."
-  kubectl apply -f argocd/apps/app-of-apps.yaml
+  kubectl apply -f argocd/apps/platform.yaml
   
   print_success "Production deployment completed!"
   print_info "ArgoCD is now managing the production deployment"

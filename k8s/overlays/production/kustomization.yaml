@@ -5,12 +5,6 @@ namespace: invisible
 
 resources:
   - ../../base
-  # Choose ONE of the following based on your setup:
-  # Option 1: Domain-based access (uncomment these)
-  # - ingress.yaml
-  # - cert-issuer.yaml
-  
-  # Option 2: Direct IP:PORT access (uncomment this)
   - ingress-nodeport.yaml
 
 
