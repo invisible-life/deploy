@@ -12,7 +12,10 @@ RUN apk add --no-cache \
     sed \
     openssl \
     nodejs \
-    npm
+    npm && \
+    # Install kustomize
+    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash && \
+    mv kustomize /usr/local/bin/
 
 # Create app directory
 WORKDIR /app
