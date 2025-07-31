@@ -31,6 +31,7 @@ DOCKER_PASSWORD=""
 DOMAIN=""
 NO_DOMAIN="false"
 SERVER_IP=""
+DEPLOYMENT_MODE="kubernetes"  # Default to Kubernetes deployment
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -54,6 +55,10 @@ while [[ $# -gt 0 ]]; do
     --ip)
       SERVER_IP="$2"
       shift 2
+      ;;
+    --docker-compose)
+      DEPLOYMENT_MODE="docker-compose"
+      shift
       ;;
     *)
       print_error "Unknown option: $1"
@@ -123,24 +128,61 @@ print_info "Generating secrets..."
 # Source the .env to get any existing values
 source .env || true
 
-# Check if kubectl is available
-if command -v kubectl >/dev/null 2>&1; then
+# Install k3s if not present and we're deploying to Kubernetes
+if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
+  if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+    print_info "Installing k3s..."
+    curl -sfL https://get.k3s.io | sh -
+    
+    # Wait for k3s to be ready
+    print_info "Waiting for k3s to be ready..."
+    sleep 10
+    
+    # Export kubeconfig
+    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+    
+    # Make kubectl accessible
+    if [ -f /usr/local/bin/kubectl ]; then
+      ln -sf /usr/local/bin/kubectl /usr/bin/kubectl 2>/dev/null || true
+    fi
+    
+    # Wait for node to be ready
+    print_info "Waiting for k3s node to be ready..."
+    until kubectl get nodes | grep -q " Ready"; do
+      echo -n "."
+      sleep 5
+    done
+    echo ""
+    print_success "k3s installed successfully!"
+  fi
+  
   # Kubernetes deployment
-  print_info "Kubernetes detected, generating Kubernetes secrets..."
+  print_info "Deploying to Kubernetes..."
   ./scripts/generate-secrets.sh
   
-  print_info "Deploying with ArgoCD..."
+  # Install ArgoCD if not present
+  if ! kubectl get namespace argocd >/dev/null 2>&1; then
+    print_info "Installing ArgoCD..."
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    
+    print_info "Waiting for ArgoCD to be ready..."
+    kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
+  fi
+  
+  print_info "Deploying applications with ArgoCD..."
   kubectl create namespace invisible --dry-run=client -o yaml | kubectl apply -f -
   kubectl apply -f argocd/apps/app-of-apps.yaml
   
   print_success "ArgoCD applications deployed! Monitor progress with:"
   echo "  kubectl get applications -n argocd"
+  echo "  kubectl get pods -n invisible"
 else
   # Docker Compose deployment
   print_info "Using Docker Compose deployment..."
   
-  # Generate local secrets
-  ./scripts/generate-secrets.sh || print_warning "Secrets generation had issues, continuing..."
+  # Generate local secrets for Docker Compose
+  print_info "Generating local configuration..."
   
   # Copy deployment files to persistent volume
   print_info "Setting up deployment files..."
