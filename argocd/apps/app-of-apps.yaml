@@ -8,12 +8,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/invisible-life/deploy  # Update with your repo URL
+    repoURL: https://github.com/invisible-life/deploy
     targetRevision: HEAD
-    path: argocd/apps
+    path: k8s/overlays/production
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: invisible
   syncPolicy:
     automated:
       prune: true
