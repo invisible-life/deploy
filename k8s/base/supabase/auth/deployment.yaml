@@ -130,13 +130,13 @@ spec:
         - name: GOTRUE_RATE_LIMIT_EMAIL_SENT
           value: "3600"
         
-        # MFA Configuration - Temporarily disabled to allow login
+        # MFA Configuration
         - name: GOTRUE_MFA_ENABLED
-          value: "false"
+          value: "true"
         - name: GOTRUE_MFA_TOTP_ISSUER
           value: "Invisible"
         - name: GOTRUE_MFA_TOTP_ENABLED
-          value: "false"
+          value: "true"
         - name: GOTRUE_MFA_MAX_ENROLLED_FACTORS
           value: "10"
         
