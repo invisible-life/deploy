@@ -67,11 +67,17 @@ spec:
           value: "http://invisible-etl:4001"
         - name: APP_BASE_URL
           value: "http://ui-hub"
-        # Public-facing URLs for frontend config
+        # Public-facing URLs from ConfigMap
         - name: API_PUBLIC_URL
-          value: "https://api.invisible.life"  # Will be overridden by overlays
+          valueFrom:
+            configMapKeyRef:
+              name: url-config
+              key: API_PUBLIC_URL
         - name: SUPABASE_PUBLIC_URL
-          value: "https://api.invisible.life"  # Will be overridden by overlays
+          valueFrom:
+            configMapKeyRef:
+              name: url-config
+              key: SUPABASE_PUBLIC_URL
         - name: SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:

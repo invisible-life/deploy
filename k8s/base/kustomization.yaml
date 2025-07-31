@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - namespace/
+  - configmaps/
   - supabase/
   - services/
   - ui/
