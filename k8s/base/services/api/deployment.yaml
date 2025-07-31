@@ -91,6 +91,11 @@ spec:
               key: CREDENTIALS_ENCRYPTION_KEY
         - name: ENCRYPTION_ALGORITHM
           value: "aes-256-gcm"
+        # CORS Configuration
+        - name: CORS_ORIGINS
+          value: "*"  # Allow all origins - the app should handle CORS properly
+        - name: CORS_ENABLED
+          value: "true"
         livenessProbe:
           httpGet:
             path: /health

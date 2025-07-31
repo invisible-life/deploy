@@ -66,6 +66,7 @@ data:
       plugins:
       - name: cors
 
+
     - name: auth-v1
       url: http://supabase-auth:9999/
       routes:
