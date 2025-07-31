@@ -6,8 +6,9 @@ metadata:
     app.kubernetes.io/name: invisible
     app.kubernetes.io/component: config
 data:
-  # These values will be set by the deployment script based on domain/IP configuration
-  API_PUBLIC_URL: "http://localhost:4300"
-  SUPABASE_PUBLIC_URL: "http://localhost:8000"
-  SITE_URL: "http://localhost:3000"
-  API_EXTERNAL_URL: "http://localhost:8000"
+  # These values should be dynamically set by the deployment process
+  # Format: http://EXTERNAL_IP:NODE_PORT
+  API_PUBLIC_URL: "http://EXTERNAL_IP:30084"
+  SUPABASE_PUBLIC_URL: "http://EXTERNAL_IP:30082"
+  SITE_URL: "http://EXTERNAL_IP:30080"
+  API_EXTERNAL_URL: "http://EXTERNAL_IP:30082"
