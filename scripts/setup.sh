@@ -128,32 +128,13 @@ print_info "Generating secrets..."
 # Source the .env to get any existing values
 source .env || true
 
-# Install k3s if not present and we're deploying to Kubernetes
+# Deploy to Kubernetes or Docker Compose based on mode
 if [ "$DEPLOYMENT_MODE" = "kubernetes" ]; then
-  if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
-    print_info "Installing k3s..."
-    curl -sfL https://get.k3s.io | sh -
-    
-    # Wait for k3s to be ready
-    print_info "Waiting for k3s to be ready..."
-    sleep 10
-    
-    # Export kubeconfig
-    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-    
-    # Make kubectl accessible
-    if [ -f /usr/local/bin/kubectl ]; then
-      ln -sf /usr/local/bin/kubectl /usr/bin/kubectl 2>/dev/null || true
-    fi
-    
-    # Wait for node to be ready
-    print_info "Waiting for k3s node to be ready..."
-    until kubectl get nodes | grep -q " Ready"; do
-      echo -n "."
-      sleep 5
-    done
-    echo ""
-    print_success "k3s installed successfully!"
+  # Check if kubectl can connect to cluster
+  if ! kubectl cluster-info >/dev/null 2>&1; then
+    print_error "No Kubernetes cluster detected!"
+    print_info "Please install k3s/k8s on the host system first, or use --docker-compose flag"
+    exit 1
   fi
   
   # Kubernetes deployment
