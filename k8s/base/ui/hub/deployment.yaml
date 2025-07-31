@@ -24,16 +24,22 @@ spec:
         - containerPort: 80
           name: http
         env:
-        # These are baked into the image at build time, but can be overridden
+        # These are configured from the url-config ConfigMap for external access
         - name: VITE_SUPABASE_URL
-          value: "http://supabase-kong:8000"
+          valueFrom:
+            configMapKeyRef:
+              name: url-config
+              key: SUPABASE_PUBLIC_URL
         - name: VITE_SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:
               name: supabase-secrets
               key: ANON_KEY
         - name: VITE_API_URL
-          value: "http://invisible-api:4300"
+          valueFrom:
+            configMapKeyRef:
+              name: url-config
+              key: API_PUBLIC_URL
         # Nginx proxy configuration
         - name: API_HOST
           value: "invisible-api"
