@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailpit
+  labels:
+    app.kubernetes.io/name: mailpit
+    app.kubernetes.io/component: mail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mailpit
+      app.kubernetes.io/component: mail
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mailpit
+        app.kubernetes.io/component: mail
+    spec:
+      containers:
+      - name: mailpit
+        image: axllent/mailpit:latest
+        ports:
+        - containerPort: 1025  # SMTP
+          name: smtp
+        - containerPort: 8025  # Web UI
+          name: http
+        env:
+        - name: MP_SMTP_AUTH_ACCEPT_ANY
+          value: "true"
+        - name: MP_SMTP_AUTH_ALLOW_INSECURE
+          value: "true"

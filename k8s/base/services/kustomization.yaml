@@ -10,6 +10,7 @@ resources:
   - schema/
   - operations/
   - ollama/
+  - mailpit/
 
 commonLabels:
   app.kubernetes.io/part-of: invisible-platform
