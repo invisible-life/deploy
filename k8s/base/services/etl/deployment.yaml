@@ -20,6 +20,8 @@ spec:
       initContainers:
       - name: setup
         image: invisiblelife/etl:latest
+        
+        imagePullPolicy: Always
         command: ["node", "/app/dist/index.js", "setup"]
         env:
         - name: DATABASE_HOST
@@ -65,6 +67,8 @@ spec:
       containers:
       - name: etl
         image: invisiblelife/etl:latest
+        
+        imagePullPolicy: Always
         ports:
         - containerPort: 4001
           name: http

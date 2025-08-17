@@ -20,6 +20,8 @@ spec:
       containers:
       - name: processor
         image: invisiblelife/processor:latest
+        
+        imagePullPolicy: Always
         env:
         - name: NODE_ENV
           value: "production"

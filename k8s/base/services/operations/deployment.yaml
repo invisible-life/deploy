@@ -20,6 +20,8 @@ spec:
       containers:
       - name: operations
         image: invisiblelife/operations:latest
+        
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
           name: http

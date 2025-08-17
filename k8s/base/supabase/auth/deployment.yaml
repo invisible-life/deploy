@@ -21,9 +21,13 @@ spec:
       initContainers:
       - name: wait-for-db
         image: busybox:1.35
+        
+        imagePullPolicy: Always
         command: ['sh', '-c', 'until nc -z supabase-db 5432; do echo "Waiting for database..."; sleep 2; done']
       - name: create-auth-schema
         image: postgres:15-alpine
+        
+        imagePullPolicy: Always
         env:
         - name: PGPASSWORD
           valueFrom:
@@ -39,6 +43,8 @@ spec:
       containers:
       - name: auth
         image: supabase/gotrue:v2.158.1
+        
+        imagePullPolicy: Always
         ports:
         - containerPort: 9999
           name: http

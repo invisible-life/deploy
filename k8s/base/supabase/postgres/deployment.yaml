@@ -22,6 +22,8 @@ spec:
       initContainers:
       - name: init-permissions
         image: busybox
+        
+        imagePullPolicy: Always
         command: ['sh', '-c', 'chown -R 105:106 /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data']
         volumeMounts:
         - name: postgres-data
@@ -29,6 +31,8 @@ spec:
       containers:
       - name: postgres
         image: supabase/postgres:15.8.1.060
+        
+        imagePullPolicy: Always
         ports:
         - containerPort: 5432
           name: postgres

@@ -21,10 +21,14 @@ spec:
       # Wait for ETL to be ready
       - name: wait-for-etl
         image: busybox:1.35
+        
+        imagePullPolicy: Always
         command: ['sh', '-c', 'until nc -z invisible-etl 4001; do echo "Waiting for ETL..."; sleep 2; done; echo "ETL is ready"']
       containers:
       - name: schema
         image: invisiblelife/schema:latest
+        
+        imagePullPolicy: Always
         command: ["/bin/sh", "-c"]
         args: 
         - |

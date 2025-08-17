@@ -21,6 +21,8 @@ spec:
       initContainers:
       - name: ensure-db-roles
         image: postgres:15-alpine
+        
+        imagePullPolicy: Always
         env:
         - name: PGPASSWORD
           valueFrom:
@@ -64,6 +66,8 @@ spec:
       containers:
       - name: postgrest
         image: postgrest/postgrest:v12.2.3
+        
+        imagePullPolicy: Always
         command:
           - sh
           - -c

@@ -20,6 +20,8 @@ spec:
       containers:
       - name: ui-hub
         image: invisiblelife/ui-hub:latest
+        
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
           name: http
