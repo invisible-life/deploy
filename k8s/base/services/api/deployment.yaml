@@ -73,7 +73,7 @@ spec:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
         # Supabase services (internal)
-        - name: SUPABASE_URL
+        - name: NEXT_PUBLIC_SUPABASE_URL
           value: "http://supabase-kong.invisible.svc.cluster.local:8000"
         - name: NEXT_PUBLIC_SUPABASE_ANON_KEY
           valueFrom:
