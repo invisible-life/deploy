@@ -11,9 +11,13 @@ data:
     - username: anon
       keyauth_credentials:
       - key: ${ANON_KEY}
+      acls:
+      - group: anon
     - username: service_role
       keyauth_credentials:
       - key: ${SERVICE_ROLE_KEY}
+      acls:
+      - group: service_role
 
     services:
     - name: auth-v1-open-verify
