@@ -7,7 +7,6 @@ resources:
   - postgres/
   - auth/
   - kong/
-  - rest/
 
 # Common labels
 commonLabels:
