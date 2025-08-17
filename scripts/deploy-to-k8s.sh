@@ -91,7 +91,7 @@ kubectl create namespace invisible --dry-run=client -o yaml | kubectl apply -f -
 
 # Generate secrets AFTER namespace exists but BEFORE deploying apps
 print_info "Generating secrets..."
-DOCKER_USERNAME="$DOCKER_USERNAME" DOCKER_PASSWORD="$DOCKER_PASSWORD" ./scripts/generate-secrets.sh
+DOCKER_USERNAME="$DOCKER_USERNAME" DOCKER_PASSWORD="$DOCKER_PASSWORD" ./scripts/generate-k8s-secrets.sh
 
 # Auto-detect server IP if not provided
 if [ -z "$SERVER_IP" ]; then
