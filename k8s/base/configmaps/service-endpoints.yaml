@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-endpoints
+  labels:
+    app.kubernetes.io/name: invisible
+    app.kubernetes.io/component: config
+data:
+  # External access ports (NodePort services)
+  # These are used when building public URLs for accessing services from outside the cluster
+  # Internal service-to-service communication uses Kubernetes DNS (service.namespace.svc.cluster.local)
+  
+  EXTERNAL_UI_HUB_PORT: "30080"
+  EXTERNAL_UI_CHAT_PORT: "30081"
+  EXTERNAL_SUPABASE_KONG_PORT: "30082"
+  EXTERNAL_MAILPIT_PORT: "30083"
+  EXTERNAL_API_PORT: "30084"

@@ -24,22 +24,33 @@ spec:
         - containerPort: 80
           name: http
         env:
-        # These are configured from the url-config ConfigMap for external access
-        - name: VITE_SUPABASE_URL
+        # Server configuration
+        - name: SERVER_IP
           valueFrom:
             configMapKeyRef:
-              name: url-config
-              key: SUPABASE_PUBLIC_URL
+              name: server-config
+              key: SERVER_IP
+        # External ports for building public URLs
+        - name: EXTERNAL_SUPABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_SUPABASE_KONG_PORT
+        - name: EXTERNAL_API_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_API_PORT
+        # Build public URLs from IP and ports
+        - name: VITE_SUPABASE_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_SUPABASE_PORT)"
         - name: VITE_SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:
               name: supabase-secrets
               key: ANON_KEY
         - name: VITE_API_URL
-          valueFrom:
-            configMapKeyRef:
-              name: url-config
-              key: API_PUBLIC_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_API_PORT)"
         # Nginx proxy configuration
         - name: API_HOST
           value: "invisible-api"

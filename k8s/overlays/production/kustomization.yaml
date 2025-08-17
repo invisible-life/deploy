@@ -159,15 +159,6 @@ configMapGenerator:
       - ENABLE_DEBUG=false
       - ENABLE_METRICS=true
       - ENABLE_TRACING=true
-  
-  # URL configuration - will be replaced by setup script
-  - name: url-config
-    behavior: replace
-    literals:
-      - API_PUBLIC_URL=http://localhost:4300
-      - SUPABASE_PUBLIC_URL=http://localhost:8000
-      - SITE_URL=http://localhost:3000
-      - API_EXTERNAL_URL=http://localhost:8000
 
 # Labels for production environment
 commonLabels:

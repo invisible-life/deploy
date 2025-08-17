@@ -68,16 +68,28 @@ spec:
           value: "0.0.0.0"
         - name: GOTRUE_API_PORT
           value: "9999"
+        # Server configuration
+        - name: SERVER_IP
+          valueFrom:
+            configMapKeyRef:
+              name: server-config
+              key: SERVER_IP
+        # External ports
+        - name: EXTERNAL_SUPABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_SUPABASE_KONG_PORT
+        - name: EXTERNAL_UI_HUB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_UI_HUB_PORT
+        # Build public URLs from SERVER_IP and ports
         - name: API_EXTERNAL_URL
-          valueFrom:
-            configMapKeyRef:
-              name: url-config
-              key: SUPABASE_PUBLIC_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_SUPABASE_PORT)"
         - name: GOTRUE_SITE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: url-config
-              key: SITE_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_UI_HUB_PORT)"
         
         # JWT - Extended session times
         - name: GOTRUE_JWT_EXP

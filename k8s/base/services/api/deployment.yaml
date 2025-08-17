@@ -58,7 +58,7 @@ spec:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
         - name: POSTGRES_HOST
-          value: "supabase-db"
+          value: "supabase-db.invisible.svc.cluster.local"
         - name: POSTGRES_PORT
           value: "5432"
         - name: POSTGRES_DB
@@ -66,15 +66,15 @@ spec:
         - name: POSTGRES_USER
           value: "postgres"
         - name: POSTGRES_URL
-          value: "postgresql://postgres@supabase-db:5432/postgres"
+          value: "postgresql://postgres:$(POSTGRES_PASSWORD)@supabase-db.invisible.svc.cluster.local:5432/postgres"
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
-        # Supabase
-        - name: NEXT_PUBLIC_SUPABASE_URL
-          value: "http://supabase-kong:8000"
+        # Supabase services (internal)
+        - name: SUPABASE_URL
+          value: "http://supabase-kong.invisible.svc.cluster.local:8000"
         - name: NEXT_PUBLIC_SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:
@@ -85,22 +85,40 @@ spec:
             secretKeyRef:
               name: supabase-secrets
               key: JWT_SECRET
-        # Service URLs
+        # Internal service URLs
         - name: ETL_SERVICE_URL
-          value: "http://invisible-etl:4001"
-        - name: APP_BASE_URL
-          value: "http://ui-hub"
-        # Public-facing URLs from ConfigMap
+          value: "http://invisible-etl.invisible.svc.cluster.local:4001"
+        - name: UI_HUB_URL
+          value: "http://ui-hub.invisible.svc.cluster.local"
+        # Server configuration for external access
+        - name: SERVER_IP
+          valueFrom:
+            configMapKeyRef:
+              name: server-config
+              key: SERVER_IP
+        # External ports from configmap
+        - name: EXTERNAL_API_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_API_PORT
+        - name: EXTERNAL_SUPABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_SUPABASE_KONG_PORT
+        - name: EXTERNAL_UI_HUB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: EXTERNAL_UI_HUB_PORT
+        # Public URLs built from SERVER_IP and external ports
         - name: API_PUBLIC_URL
-          valueFrom:
-            configMapKeyRef:
-              name: url-config
-              key: API_PUBLIC_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_API_PORT)"
         - name: SUPABASE_PUBLIC_URL
-          valueFrom:
-            configMapKeyRef:
-              name: url-config
-              key: SUPABASE_PUBLIC_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_SUPABASE_PORT)"
+        - name: UI_HUB_PUBLIC_URL
+          value: "http://$(SERVER_IP):$(EXTERNAL_UI_HUB_PORT)"
         - name: SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:
