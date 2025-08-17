@@ -55,7 +55,7 @@ spec:
           value: "http://$(SERVER_IP):$(EXTERNAL_API_PORT)"
         # Nginx proxy configuration
         - name: API_HOST
-          value: "invisible-api"
+          value: "invisible-api.invisible.svc.cluster.local"
         - name: API_PORT
           value: "4300"
         livenessProbe:
