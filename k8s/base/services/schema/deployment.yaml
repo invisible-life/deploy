@@ -35,15 +35,19 @@ spec:
           echo "Running database migrations..."
           cd /app
           python scripts/migrations.py
+          echo "Running SQLMesh migrations..."
           sqlmesh migrate
-          sqlmesh plan --auto-apply
-          echo "Migrations complete. Exiting."
-        ports:
-        - containerPort: 8000
-          name: http
+          sqlmesh plan --auto-apply --no-prompts
+          echo "SQLMesh migrations complete."
+          # Run SQLMesh scheduler to keep models up to date
+          echo "Starting SQLMesh scheduler..."
+          while true; do
+            echo "Running SQLMesh plan..."
+            sqlmesh plan --auto-apply --no-prompts
+            echo "Sleeping for 1 hour before next run..."
+            sleep 3600
+          done
         env:
-        - name: SKIP_SQLMESH_UI
-          value: "true"
         - name: POSTGRES_HOST
           value: "supabase-db"
         - name: POSTGRES_PORT

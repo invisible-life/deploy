@@ -3,5 +3,5 @@ kind: Kustomization
 
 resources:
   - job.yaml
-  # - deployment.yaml  # Commented out - using Job instead
+  - deployment.yaml  # Runs SQLMesh continuously
   # - service.yaml     # Not needed for migration job
