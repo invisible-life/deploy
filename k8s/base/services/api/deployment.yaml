@@ -141,6 +141,9 @@ spec:
           value: "*"  # Allow all origins - the app should handle CORS properly
         - name: CORS_ENABLED
           value: "true"
+        # Mailpit Configuration
+        - name: MAILPIT_URL
+          value: "http://mailpit.invisible.svc.cluster.local:8025"
         livenessProbe:
           httpGet:
             path: /health
