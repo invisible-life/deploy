@@ -17,6 +17,20 @@ spec:
         app.kubernetes.io/name: ollama
         app.kubernetes.io/component: llm
     spec:
+      initContainers:
+      - name: pull-models
+        image: ollama/ollama:latest
+        command: 
+        - sh
+        - -c
+        - |
+          ollama serve &
+          sleep 5
+          ollama pull deepseek-r1:8b || true
+          ollama pull llama3.2:3b || true
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
       containers:
       - name: ollama
         image: ollama/ollama:latest

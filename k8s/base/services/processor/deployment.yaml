@@ -48,6 +48,8 @@ spec:
         # LLM Configuration
         - name: OLLAMA_HOST
           value: "http://ollama:11434"  # Assumes Ollama service deployed separately
+        - name: OLLAMA_REMOTE_HOST
+          value: "http://ollama:11434"  # Remote Ollama host (same as local for now)
         # Service URLs
         - name: INVISIBLE_API_URL
           value: "http://invisible-api:4300"
