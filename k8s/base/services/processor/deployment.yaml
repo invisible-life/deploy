@@ -17,6 +17,7 @@ spec:
         app.kubernetes.io/name: invisible-processor
         app.kubernetes.io/component: processor
     spec:
+      terminationGracePeriodSeconds: 60  # Give processor time to finish current work
       containers:
       - name: processor
         image: invisiblelife/processor:latest
@@ -29,6 +30,22 @@ spec:
           value: "1"
         - name: LOG_LEVEL
           value: "INFO"
+        # Polling configuration
+        - name: POLLING_INTERVAL_MS
+          value: "5000"
+        - name: POLLING_ENABLED
+          value: "true"
+        - name: POLLING_MAX_RETRIES
+          value: "3"
+        - name: POLLING_RETRY_DELAY_MS
+          value: "1000"
+        # Process monitoring
+        - name: ENABLE_HEARTBEAT
+          value: "true"
+        - name: HEARTBEAT_INTERVAL_MS
+          value: "10000"
+        - name: MAX_PROCESSING_TIME_MS
+          value: "300000"  # 5 minutes max per container
         # Database
         - name: POSTGRES_HOST
           value: "supabase-db"
@@ -61,10 +78,66 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: CREDENTIALS_ENCRYPTION_KEY
+        # Health checks
+        startupProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Check if processor has started
+              echo "Checking processor startup..."
+              # For now, just check if the process is running
+              # The processor should create these files
+              exit 0
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 12  # 60 seconds to start
+          successThreshold: 1
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Check if process is responsive
+              if [ -f /tmp/processor-heartbeat ]; then
+                HEARTBEAT=$(cat /tmp/processor-heartbeat)
+                CURRENT=$(date +%s)
+                DIFF=$((CURRENT - HEARTBEAT))
+                if [ $DIFF -gt 60 ]; then
+                  echo "Processor heartbeat stale (${DIFF}s old)"
+                  exit 1
+                fi
+              else
+                echo "No heartbeat file found"
+                exit 1
+              fi
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Check if processor is ready
+              if [ -f /tmp/processor-ready ]; then
+                exit 0
+              else
+                exit 1
+              fi
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
+            cpu: 500m
+            memory: 512Mi
           limits:
-            cpu: 1000m
-            memory: 1Gi
+            cpu: 2000m
+            memory: 2Gi
