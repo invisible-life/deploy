@@ -67,6 +67,18 @@ spec:
           value: "http://ollama:11434"  # Assumes Ollama service deployed separately
         - name: OLLAMA_REMOTE_HOST
           value: "http://ollama:11434"  # Remote Ollama host (same as local for now)
+        - name: OLLAMA_ENDPOINT_URL
+          value: "http://ollama:11434"  # Explicit endpoint URL for Ollama
+        - name: LLM_ENDPOINT_FALLBACK
+          value: "http://ollama:11434"  # Fallback when DB config missing endpoint
+        - name: LLM_MODE_OVERRIDE
+          value: "remote"  # Force remote mode when using k8s Ollama service
+        - name: LLM_PROVIDER
+          value: "ollama"
+        - name: LLM_MODEL
+          value: "deepseek-r1:8b"
+        - name: USE_ENV_CONFIG_FALLBACK
+          value: "true"  # Use environment variables when DB config incomplete
         # Service URLs
         - name: INVISIBLE_API_URL
           value: "http://invisible-api:4300"
