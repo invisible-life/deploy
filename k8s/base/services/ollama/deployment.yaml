@@ -16,6 +16,9 @@ spec:
       labels:
         app.kubernetes.io/name: ollama
         app.kubernetes.io/component: llm
+        app.kubernetes.io/managed-by: kustomize
+        app.kubernetes.io/part-of: invisible-platform
+        environment: production
     spec:
       initContainers:
       - name: pull-models
@@ -42,6 +45,8 @@ spec:
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
+        - name: OLLAMA_DEBUG
+          value: "1"
         volumeMounts:
         - name: ollama-data
           mountPath: /root/.ollama
