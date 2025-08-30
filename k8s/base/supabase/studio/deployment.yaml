@@ -29,6 +29,15 @@ spec:
             secretKeyRef:
               name: supabase-secrets
               key: POSTGRES_PASSWORD
+        - name: NEXT_PUBLIC_SUPABASE_URL
+          value: "http://supabase-kong:8000"
+        - name: NEXT_PUBLIC_SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: STUDIO_PG_META_URL
+          value: "http://supabase-meta:8080"
         - name: DEFAULT_ORGANIZATION_NAME
           value: "Invisible"
         - name: DEFAULT_PROJECT_NAME

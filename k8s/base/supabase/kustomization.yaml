@@ -7,6 +7,7 @@ resources:
   - postgres/
   - auth/
   - kong/
+  - meta/
   - studio/
 
 # Common labels
