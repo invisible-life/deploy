@@ -43,9 +43,9 @@ spec:
         - name: ENABLE_HEARTBEAT
           value: "true"
         - name: HEARTBEAT_INTERVAL_MS
-          value: "10000"
+          value: "30000"  # 30 seconds heartbeat for DeepSeek R1
         - name: MAX_PROCESSING_TIME_MS
-          value: "300000"  # 5 minutes max per container
+          value: "600000"  # 10 minutes max for DeepSeek R1 reasoning
         # Database
         - name: POSTGRES_HOST
           value: "supabase-db"
@@ -118,7 +118,7 @@ spec:
                 HEARTBEAT=$(cat /tmp/processor-heartbeat)
                 CURRENT=$(date +%s)
                 DIFF=$((CURRENT - HEARTBEAT))
-                if [ $DIFF -gt 60 ]; then
+                if [ $DIFF -gt 660 ]; then  # 11 minutes threshold for DeepSeek R1
                   echo "Processor heartbeat stale (${DIFF}s old)"
                   exit 1
                 fi
@@ -126,10 +126,10 @@ spec:
                 echo "No heartbeat file found"
                 exit 1
               fi
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 600  # 10 minutes for DeepSeek R1 reasoning
+          timeoutSeconds: 30
+          failureThreshold: 2
         readinessProbe:
           exec:
             command:
