@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-studio
+  namespace: invisible
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-studio
+  template:
+    metadata:
+      labels:
+        app: supabase-studio
+    spec:
+      containers:
+      - name: studio
+        image: supabase/studio:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: POSTGRES_PASSWORD
+        - name: DEFAULT_ORGANIZATION_NAME
+          value: "Invisible"
+        - name: DEFAULT_PROJECT_NAME
+          value: "Invisible Project"
+        - name: SUPABASE_URL
+          value: "http://supabase-kong:8000"
+        - name: SUPABASE_PUBLIC_URL
+          value: "http://supabase-kong:8000"
+        - name: SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: ANON_KEY
+        - name: SUPABASE_SERVICE_ROLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: SERVICE_ROLE_KEY
+        - name: LOGFLARE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-secrets
+              key: LOGFLARE_PUBLIC_ACCESS_TOKEN
+        - name: LOGFLARE_URL
+          value: "http://analytics:4000"
+        - name: NEXT_PUBLIC_ENABLE_LOGS
+          value: "true"
+        - name: NEXT_ANALYTICS_BACKEND_PROVIDER
+          value: "postgres"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
