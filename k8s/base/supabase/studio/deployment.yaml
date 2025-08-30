@@ -20,6 +20,10 @@ spec:
         - containerPort: 3000
           name: http
         env:
+        - name: HOSTNAME
+          value: "0.0.0.0"
+        - name: PORT
+          value: "3000"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
