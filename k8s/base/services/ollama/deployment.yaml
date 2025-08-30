@@ -58,11 +58,11 @@ spec:
           periodSeconds: 30
         resources:
           requests:
-            cpu: 2000m
-            memory: 12Gi
+            cpu: 8000m
+            memory: 40Gi
           limits:
-            cpu: 4000m
-            memory: 16Gi
+            cpu: 16000m
+            memory: 50Gi
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
