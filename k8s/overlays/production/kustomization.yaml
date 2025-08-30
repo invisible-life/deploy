@@ -16,7 +16,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 2
+        value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources
         value:
@@ -33,7 +33,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 2
+        value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources
         value:
@@ -50,7 +50,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 3
+        value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources
         value:
@@ -81,7 +81,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 2
+        value: 1
       - op: replace
         path: /spec/template/spec/containers/0/resources
         value:
@@ -166,10 +166,10 @@ commonLabels:
 # Production-specific configurations
 replicas:
   - name: invisible-api
-    count: 2
+    count: 1
   - name: invisible-etl
-    count: 2
+    count: 1
   - name: invisible-processor
-    count: 3
+    count: 1
   - name: supabase-kong
-    count: 2
+    count: 1
