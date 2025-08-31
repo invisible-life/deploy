@@ -59,7 +59,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            - "test -f /tmp/sqlmesh-complete || exit 1"
+            - "ps aux | grep -v grep | grep 'tail -f /dev/null' > /dev/null || exit 1"
           initialDelaySeconds: 30
           periodSeconds: 10
         resources:

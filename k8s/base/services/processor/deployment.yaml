@@ -98,7 +98,7 @@ spec:
             - -c
             - |
               # Check if node process is running
-              pgrep -f "node.*dist/index.js" > /dev/null || exit 1
+              ps aux | grep -v grep | grep "node.*dist/index.js" > /dev/null || exit 1
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 5
@@ -111,7 +111,7 @@ spec:
             - -c
             - |
               # Check if node process is still running
-              pgrep -f "node.*dist/index.js" > /dev/null || exit 1
+              ps aux | grep -v grep | grep "node.*dist/index.js" > /dev/null || exit 1
           initialDelaySeconds: 60
           periodSeconds: 60  # Check every minute
           timeoutSeconds: 5
@@ -124,7 +124,7 @@ spec:
             - |
               # Check if processor is running and connected to DB
               # Look for DB Pool connection logs in recent output
-              pgrep -f "node.*dist/index.js" > /dev/null || exit 1
+              ps aux | grep -v grep | grep "node.*dist/index.js" > /dev/null || exit 1
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
