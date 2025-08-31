@@ -47,15 +47,19 @@ spec:
         - name: POSTGRES_DATABASE
           value: "postgres"
         livenessProbe:
-          httpGet:
-            path: /
-            port: 8000
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "ps aux | grep -v grep | grep -q 'tail -f /dev/null' || exit 1"
           initialDelaySeconds: 60
           periodSeconds: 30
         readinessProbe:
-          httpGet:
-            path: /
-            port: 8000
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "test -f /tmp/sqlmesh-complete || exit 1"
           initialDelaySeconds: 30
           periodSeconds: 10
         resources:

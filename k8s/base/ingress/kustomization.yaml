@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: invisible
+
+resources:
+- domain-ingress.yaml
+- path-ingress.yaml
+- middleware.yaml
+
+# These are disabled by default - enable one based on your setup
+# To enable, remove from patchesStrategicMerge below
+patchesStrategicMerge:
+- |-
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: domain-ingress
+    namespace: invisible
+  $patch: delete
+- |-
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: path-ingress
+    namespace: invisible
+  $patch: delete

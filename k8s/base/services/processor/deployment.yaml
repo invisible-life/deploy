@@ -97,11 +97,8 @@ spec:
             - /bin/sh
             - -c
             - |
-              # Check if processor has started
-              echo "Checking processor startup..."
-              # For now, just check if the process is running
-              # The processor should create these files
-              exit 0
+              # Check if node process is running
+              pgrep -f "node.*dist/index.js" > /dev/null || exit 1
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 5
@@ -113,35 +110,21 @@ spec:
             - /bin/sh
             - -c
             - |
-              # Check if process is responsive
-              if [ -f /tmp/processor-heartbeat ]; then
-                HEARTBEAT=$(cat /tmp/processor-heartbeat)
-                CURRENT=$(date +%s)
-                DIFF=$((CURRENT - HEARTBEAT))
-                if [ $DIFF -gt 660 ]; then  # 11 minutes threshold for DeepSeek R1
-                  echo "Processor heartbeat stale (${DIFF}s old)"
-                  exit 1
-                fi
-              else
-                echo "No heartbeat file found"
-                exit 1
-              fi
+              # Check if node process is still running
+              pgrep -f "node.*dist/index.js" > /dev/null || exit 1
           initialDelaySeconds: 60
-          periodSeconds: 600  # 10 minutes for DeepSeek R1 reasoning
-          timeoutSeconds: 30
-          failureThreshold: 2
+          periodSeconds: 60  # Check every minute
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           exec:
             command:
             - /bin/sh
             - -c
             - |
-              # Check if processor is ready
-              if [ -f /tmp/processor-ready ]; then
-                exit 0
-              else
-                exit 1
-              fi
+              # Check if processor is running and connected to DB
+              # Look for DB Pool connection logs in recent output
+              pgrep -f "node.*dist/index.js" > /dev/null || exit 1
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5

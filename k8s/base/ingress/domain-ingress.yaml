@@ -1,0 +1,63 @@
+# Domain-based ingress routing
+# Replace DOMAIN_PLACEHOLDER with your actual domain
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: domain-ingress
+  namespace: invisible
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # Uncomment for HTTPS with cert-manager
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+  - host: hub.DOMAIN_PLACEHOLDER
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: invisible-ui-hub
+            port:
+              number: 80
+  - host: chat.DOMAIN_PLACEHOLDER
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: invisible-ui-chat
+            port:
+              number: 80
+  - host: api.DOMAIN_PLACEHOLDER
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: invisible-api
+            port:
+              number: 4300
+  - host: supabase.DOMAIN_PLACEHOLDER
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: supabase-kong
+            port:
+              number: 8000
+  # Uncomment for HTTPS
+  # tls:
+  # - hosts:
+  #   - hub.DOMAIN_PLACEHOLDER
+  #   - chat.DOMAIN_PLACEHOLDER
+  #   - api.DOMAIN_PLACEHOLDER
+  #   - supabase.DOMAIN_PLACEHOLDER
+  #   secretName: invisible-tls-cert

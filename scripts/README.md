@@ -40,6 +40,24 @@ sudo ./install-platform.sh -u USERNAME -p PASSWORD  # Non-interactive mode
 DOCKER_USERNAME=user DOCKER_PASSWORD=pass ./generate-k8s-secrets.sh
 ```
 
+### `setup-ingress.sh`
+**Purpose:** Configure ingress routing for domain or path-based access.
+- Supports domain-based routing (hub.yourdomain.com, api.yourdomain.com, etc.)
+- Supports path-based routing (yourdomain.com/hub, yourdomain.com/api, etc.)
+- Optional HTTPS with Let's Encrypt
+- Works with K3s's built-in Traefik ingress controller
+
+**Usage:**
+```bash
+./setup-ingress.sh                    # Interactive setup
+./setup-ingress.sh status             # Check ingress status
+```
+
+**Requirements:**
+- Existing K3s/Kubernetes cluster with Invisible platform deployed
+- Domain name (for domain-based routing) or static IP
+- DNS control (for domain setup)
+
 ## Utility Scripts
 
 ### `add-ssh-access.sh`
