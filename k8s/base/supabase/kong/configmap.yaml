@@ -321,7 +321,7 @@ data:
           - service_role
 
     - name: auth-v1
-      url: http://supabase-auth:9999/
+      url: http://supabase-auth:9999
       routes:
       - name: auth-v1-all
         strip_path: true
