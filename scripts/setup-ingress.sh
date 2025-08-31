@@ -195,6 +195,9 @@ EOF
     print_info "Applying ingress configuration..."
     kubectl apply -f "$INGRESS_FILE"
     
+    # Update API configuration to use domain URLs
+    update_api_config "$BASE_DOMAIN" "$ENABLE_HTTPS"
+    
     print_success "Domain-based routing configured!"
     
     # Get server IPv4 address
@@ -267,6 +270,72 @@ EOF
     echo "  # Should return: $SERVER_IP"
 }
 
+
+# Update API configuration to use domain URLs instead of IP:port
+update_api_config() {
+    local base_domain=$1
+    local enable_https=$2
+    local protocol="http"
+    
+    if [[ "$enable_https" == "y" ]]; then
+        protocol="https"
+    fi
+    
+    print_info "Updating API configuration to use domain URLs..."
+    
+    # Create domain configuration patch
+    DOMAIN_PATCH_FILE="/tmp/api-domain-patch.yaml"
+    
+    cat > "$DOMAIN_PATCH_FILE" <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invisible-api
+  namespace: invisible
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: API_PUBLIC_URL
+          value: "$protocol://api.$base_domain"
+        - name: SUPABASE_PUBLIC_URL
+          value: "$protocol://supabase.$base_domain"
+        - name: UI_HUB_PUBLIC_URL
+          value: "$protocol://hub.$base_domain"
+        - name: UI_CHAT_PUBLIC_URL
+          value: "$protocol://chat.$base_domain"
+        - name: CORS_ORIGINS
+          value: "$protocol://hub.$base_domain,$protocol://chat.$base_domain,$protocol://api.$base_domain"
+EOF
+    
+    # Apply the patch using kubectl patch with strategic merge
+    print_info "Patching API deployment with domain URLs..."
+    kubectl patch deployment invisible-api -n invisible --type='strategic' --patch "$(cat $DOMAIN_PATCH_FILE)"
+    
+    # Wait for rollout to complete
+    print_info "Waiting for API deployment to update..."
+    kubectl rollout status deployment/invisible-api -n invisible --timeout=120s
+    
+    # Verify the configuration took effect
+    print_info "Verifying API configuration..."
+    sleep 5  # Give the API a moment to restart
+    
+    # Test the config endpoint
+    if command -v curl &> /dev/null; then
+        CONFIG_CHECK=$(curl -s "$protocol://api.$base_domain/api/config" 2>/dev/null || echo "{}")
+        if echo "$CONFIG_CHECK" | grep -q "$base_domain"; then
+            print_success "API configuration updated successfully - now using domain URLs"
+        else
+            print_warning "API may still be starting up. Check $protocol://api.$base_domain/api/config to verify domain URLs are being used."
+        fi
+    else
+        print_success "API configuration updated to use domain URLs"
+    fi
+}
 
 # Setup cert-manager for HTTPS
 setup_cert_manager() {
