@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ingress.yaml
+
+# Patch to enable insecure mode for ArgoCD server
+patches:
+  - target:
+      kind: ConfigMap
+      name: argocd-cmd-params-cm
+      namespace: argocd
+    patch: |
+      - op: add
+        path: /data
+        value:
+          server.insecure: "true"

@@ -329,6 +329,11 @@ setup_argocd_ingress() {
         return
     fi
     
+    # Configure ArgoCD for insecure mode (required for ingress)
+    print_info "Configuring ArgoCD for ingress access..."
+    kubectl patch configmap argocd-cmd-params-cm -n argocd --type merge -p '{"data":{"server.insecure":"true"}}' 2>/dev/null || \
+        kubectl create configmap argocd-cmd-params-cm -n argocd --from-literal=server.insecure=true
+    
     # Create ArgoCD ingress manifest
     ARGOCD_INGRESS_FILE="/tmp/argocd-ingress.yaml"
     
@@ -340,7 +345,6 @@ metadata:
   namespace: argocd
   annotations:
     kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.middlewares: argocd-server-grpc@kubernetescrd
 EOF
     
     if [[ "$enable_https" == "y" ]]; then
@@ -382,22 +386,14 @@ EOF
     # Apply ArgoCD ingress
     kubectl apply -f "$ARGOCD_INGRESS_FILE"
     
-    # Create middleware for gRPC if needed (for ArgoCD CLI)
-    cat > /tmp/argocd-grpc-middleware.yaml <<EOF
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: argocd-server-grpc
-  namespace: argocd
-spec:
-  headers:
-    customRequestHeaders:
-      content-type: "application/grpc"
-EOF
-    
-    kubectl apply -f /tmp/argocd-grpc-middleware.yaml 2>/dev/null || true
+    # Restart ArgoCD server to apply insecure mode
+    print_info "Restarting ArgoCD server..."
+    kubectl rollout restart deployment argocd-server -n argocd
+    kubectl rollout status deployment argocd-server -n argocd --timeout=120s
     
     print_success "ArgoCD ingress configured"
+    print_info "ArgoCD admin password can be retrieved with:"
+    echo "  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d"
 }
 
 # Setup cert-manager for HTTPS
