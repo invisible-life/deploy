@@ -104,18 +104,20 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 12  # 60 seconds to start
           successThreshold: 1
-        livenessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - |
-              # Check if node process is still running
-              grep -q node /proc/1/cmdline || exit 1
-          initialDelaySeconds: 60
-          periodSeconds: 60  # Check every minute
-          timeoutSeconds: 5
-          failureThreshold: 3
+        # Disabled liveness probe until we have proper health checks
+        # The process-based check is useless for detecting stuck LLM calls
+        # livenessProbe:
+        #   exec:
+        #     command:
+        #     - /bin/sh
+        #     - -c
+        #     - |
+        #       # Check if node process is still running
+        #       grep -q node /proc/1/cmdline || exit 1
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 60  # Check every minute
+        #   timeoutSeconds: 5
+        #   failureThreshold: 3
         readinessProbe:
           exec:
             command:
