@@ -198,25 +198,61 @@ EOF
     print_success "Domain-based routing configured!"
     
     # Get server IP
-    SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || echo "YOUR-SERVER-IP")
+    SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || kubectl get nodes -o wide | awk 'NR==2 {print $6}' || echo "YOUR-SERVER-IP")
     
-    print_header "Next Steps"
-    print_warning "Configure your DNS A records:"
-    echo "  hub.$BASE_DOMAIN     → $SERVER_IP"
-    echo "  chat.$BASE_DOMAIN    → $SERVER_IP"
-    echo "  api.$BASE_DOMAIN     → $SERVER_IP"
-    echo "  supabase.$BASE_DOMAIN → $SERVER_IP"
+    print_header "📋 REQUIRED DNS CONFIGURATION"
+    
+    echo -e "${YELLOW}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}Add these DNS records in your domain provider's control panel:${NC}"
+    echo -e "${YELLOW}════════════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${GREEN}Option 1: Individual A Records (Recommended)${NC}"
+    echo -e "  ${GREEN}Type${NC}    ${GREEN}Name/Host${NC}                     ${GREEN}Value/Points To${NC}"
+    echo -e "  ────    ─────────                     ───────────────"
+    echo -e "  ${BLUE}A${NC}       hub                      →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}A${NC}       chat                     →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}A${NC}       api                      →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}A${NC}       supabase                 →    ${YELLOW}$SERVER_IP${NC}"
+    echo ""
+    echo -e "${GREEN}Option 2: Wildcard A Record (Easier but less flexible)${NC}"
+    echo -e "  ${BLUE}A${NC}       *                        →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${CYAN}(This will route ALL subdomains to your server)${NC}"
+    echo ""
+    echo -e "${YELLOW}════════════════════════════════════════════════════════════════════${NC}"
+    
+    print_info "Common DNS Providers:"
+    echo "  • Cloudflare: dash.cloudflare.com → Select Domain → DNS"
+    echo "  • Namecheap: ap.www.namecheap.com → Domain List → Manage → Advanced DNS"
+    echo "  • GoDaddy: dcc.godaddy.com → My Domains → DNS → Manage Zones"
+    echo "  • Google Domains: domains.google.com → My domains → DNS"
     echo ""
     
+    print_warning "DNS changes can take 5-30 minutes to propagate"
+    
     if [[ "$ENABLE_HTTPS" == "y" ]]; then
-        print_info "HTTPS will be automatically configured once DNS is set up."
+        echo ""
+        print_info "🔒 HTTPS Status:"
+        echo "  • SSL certificates will be automatically generated after DNS is configured"
+        echo "  • First visit might show a certificate warning while Let's Encrypt validates"
+        echo ""
+        print_success "Once DNS is configured, access your services at:"
+        echo "  🌐 https://hub.$BASE_DOMAIN"
+        echo "  💬 https://chat.$BASE_DOMAIN"
+        echo "  🔌 https://api.$BASE_DOMAIN"
+        echo "  🗄️  https://supabase.$BASE_DOMAIN"
     else
-        print_info "Access your services via:"
-        echo "  http://hub.$BASE_DOMAIN"
-        echo "  http://chat.$BASE_DOMAIN"
-        echo "  http://api.$BASE_DOMAIN"
-        echo "  http://supabase.$BASE_DOMAIN"
+        echo ""
+        print_success "Once DNS is configured, access your services at:"
+        echo "  🌐 http://hub.$BASE_DOMAIN"
+        echo "  💬 http://chat.$BASE_DOMAIN"
+        echo "  🔌 http://api.$BASE_DOMAIN"
+        echo "  🗄️  http://supabase.$BASE_DOMAIN"
     fi
+    
+    echo ""
+    print_info "To verify DNS is working:"
+    echo "  nslookup hub.$BASE_DOMAIN"
+    echo "  # Should return: $SERVER_IP"
 }
 
 
