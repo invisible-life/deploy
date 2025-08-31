@@ -58,11 +58,11 @@ spec:
           periodSeconds: 30
         resources:
           requests:
-            cpu: 8000m
-            memory: 40Gi
+            cpu: 2000m     # 2 CPU cores for DeepSeek R1:8b
+            memory: 8Gi    # 8GB RAM is plenty for 8b model
           limits:
-            cpu: 16000m
-            memory: 50Gi
+            cpu: 4000m     # Allow bursting to 4 cores
+            memory: 16Gi   # Max 16GB RAM
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
