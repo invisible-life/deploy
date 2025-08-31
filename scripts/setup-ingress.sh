@@ -101,6 +101,7 @@ setup_domain_routing() {
     echo "  • chat.$BASE_DOMAIN    → UI Chat"
     echo "  • api.$BASE_DOMAIN     → API"
     echo "  • supabase.$BASE_DOMAIN → Supabase Kong"
+    echo "  • argocd.$BASE_DOMAIN  → ArgoCD"
     echo ""
     
     read -p "Enable HTTPS with Let's Encrypt? (y/n): " ENABLE_HTTPS
@@ -195,6 +196,9 @@ EOF
     print_info "Applying ingress configuration..."
     kubectl apply -f "$INGRESS_FILE"
     
+    # Create ArgoCD ingress (in argocd namespace)
+    setup_argocd_ingress "$BASE_DOMAIN" "$ENABLE_HTTPS"
+    
     # Update API configuration to use domain URLs
     update_api_config "$BASE_DOMAIN" "$ENABLE_HTTPS"
     
@@ -228,6 +232,7 @@ EOF
     echo -e "  ${BLUE}${RECORD_TYPE}${NC}       chat                     →    ${YELLOW}$SERVER_IP${NC}"
     echo -e "  ${BLUE}${RECORD_TYPE}${NC}       api                      →    ${YELLOW}$SERVER_IP${NC}"
     echo -e "  ${BLUE}${RECORD_TYPE}${NC}       supabase                 →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}${RECORD_TYPE}${NC}       argocd                   →    ${YELLOW}$SERVER_IP${NC}"
     echo ""
     echo -e "${GREEN}Option 2: Wildcard ${RECORD_TYPE} Record (Easier but less flexible)${NC}"
     echo -e "  ${BLUE}${RECORD_TYPE}${NC}       *                        →    ${YELLOW}$SERVER_IP${NC}"
@@ -255,6 +260,7 @@ EOF
         echo "  💬 https://chat.$BASE_DOMAIN"
         echo "  🔌 https://api.$BASE_DOMAIN"
         echo "  🗄️  https://supabase.$BASE_DOMAIN"
+        echo "  🚀 https://argocd.$BASE_DOMAIN"
     else
         echo ""
         print_success "Once DNS is configured, access your services at:"
@@ -262,6 +268,7 @@ EOF
         echo "  💬 http://chat.$BASE_DOMAIN"
         echo "  🔌 http://api.$BASE_DOMAIN"
         echo "  🗄️  http://supabase.$BASE_DOMAIN"
+        echo "  🚀 http://argocd.$BASE_DOMAIN"
     fi
     
     echo ""
@@ -307,6 +314,90 @@ update_api_config() {
     
     print_info "Domain configuration stored in ConfigMap 'domain-config'"
     print_info "To view current configuration: kubectl get configmap domain-config -n invisible -o yaml"
+}
+
+# Setup ArgoCD ingress
+setup_argocd_ingress() {
+    local base_domain=$1
+    local enable_https=$2
+    
+    print_info "Setting up ArgoCD ingress..."
+    
+    # Check if ArgoCD namespace exists
+    if ! kubectl get namespace argocd &> /dev/null; then
+        print_warning "ArgoCD namespace not found. Skipping ArgoCD ingress setup."
+        return
+    fi
+    
+    # Create ArgoCD ingress manifest
+    ARGOCD_INGRESS_FILE="/tmp/argocd-ingress.yaml"
+    
+    cat > "$ARGOCD_INGRESS_FILE" <<EOF
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: argocd-server-grpc@kubernetescrd
+EOF
+    
+    if [[ "$enable_https" == "y" ]]; then
+        cat >> "$ARGOCD_INGRESS_FILE" <<EOF
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+EOF
+    else
+        cat >> "$ARGOCD_INGRESS_FILE" <<EOF
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+EOF
+    fi
+    
+    cat >> "$ARGOCD_INGRESS_FILE" <<EOF
+spec:
+  rules:
+  - host: argocd.$base_domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 80
+EOF
+    
+    if [[ "$enable_https" == "y" ]]; then
+        cat >> "$ARGOCD_INGRESS_FILE" <<EOF
+  tls:
+  - hosts:
+    - argocd.$base_domain
+    secretName: argocd-tls-cert
+EOF
+    fi
+    
+    # Apply ArgoCD ingress
+    kubectl apply -f "$ARGOCD_INGRESS_FILE"
+    
+    # Create middleware for gRPC if needed (for ArgoCD CLI)
+    cat > /tmp/argocd-grpc-middleware.yaml <<EOF
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: argocd-server-grpc
+  namespace: argocd
+spec:
+  headers:
+    customRequestHeaders:
+      content-type: "application/grpc"
+EOF
+    
+    kubectl apply -f /tmp/argocd-grpc-middleware.yaml 2>/dev/null || true
+    
+    print_success "ArgoCD ingress configured"
 }
 
 # Setup cert-manager for HTTPS
