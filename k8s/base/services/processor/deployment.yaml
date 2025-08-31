@@ -45,7 +45,7 @@ spec:
         - name: HEARTBEAT_INTERVAL_MS
           value: "30000"  # 30 seconds heartbeat for DeepSeek R1
         - name: MAX_PROCESSING_TIME_MS
-          value: "600000"  # 10 minutes max for DeepSeek R1 reasoning
+          value: "900000"  # 15 minutes max for DeepSeek R1 reasoning
         # Database
         - name: POSTGRES_HOST
           value: "supabase-db"
