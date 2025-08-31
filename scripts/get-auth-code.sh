@@ -126,14 +126,19 @@ TEXT_BODY=$(echo "$MESSAGE" | jq -r '.Text // empty')
 
 # Try to find a 6-digit code first
 CODE=""
-if [ -n "$HTML_BODY" ]; then
-    # Look for 6-digit codes in HTML
-    CODE=$(echo "$HTML_BODY" | grep -oE '[0-9]{6}' | head -n 1)
+if [ -n "$TEXT_BODY" ]; then
+    # Look for the OTP code after "enter the code:" in plain text
+    CODE=$(echo "$TEXT_BODY" | grep -i "enter the code:" | sed 's/.*enter the code: *//' | grep -oE '[0-9]{6}' | head -n 1)
+fi
+
+if [ -z "$CODE" ] && [ -n "$HTML_BODY" ]; then
+    # If not found in text, look for 6-digit codes in HTML (but avoid token hashes)
+    CODE=$(echo "$HTML_BODY" | grep -i "enter the code" | grep -oE '[0-9]{6}' | head -n 1)
 fi
 
 if [ -z "$CODE" ] && [ -n "$TEXT_BODY" ]; then
-    # Look for 6-digit codes in text
-    CODE=$(echo "$TEXT_BODY" | grep -oE '[0-9]{6}' | head -n 1)
+    # Fallback: Look for any 6-digit code in text (less reliable)
+    CODE=$(echo "$TEXT_BODY" | grep -oE '\b[0-9]{6}\b' | head -n 1)
 fi
 
 # Try to find a confirmation/authentication link
