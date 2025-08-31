@@ -54,6 +54,54 @@ data:
       - group: service_role
 
     services:
+    - name: auth-v1-options-handler
+      host: localhost
+      port: 65535
+      protocol: http
+      routes:
+      - name: auth-v1-options-routes
+        methods:
+        - OPTIONS
+        paths:
+        - /auth/v1/
+      plugins:
+      - name: request-termination
+        config:
+          status_code: 200
+          message: "OK"
+      - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          preflight_continue: false
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          - x-supabase-api-version
+          - x-client-info
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
+          exposed_headers:
+          - Authorization
+          - Content-Type
+          - apikey
+          - x-supabase-api-version
+          max_age: 3600
+
     - name: auth-v1-open-verify
       url: http://supabase-auth:9999/verify
       routes:
