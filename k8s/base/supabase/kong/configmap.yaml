@@ -29,6 +29,28 @@ data:
         - /auth/v1/verify
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
 
     - name: auth-v1-open-callback
       url: http://supabase-auth:9999/callback
@@ -39,6 +61,28 @@ data:
         - /auth/v1/callback
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
 
     - name: auth-v1-open-authorize
       url: http://supabase-auth:9999/authorize
@@ -49,6 +93,28 @@ data:
         - /auth/v1/authorize
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
 
     - name: auth-v1-open-otp
       url: http://supabase-auth:9999/otp
@@ -59,6 +125,28 @@ data:
         - /auth/v1/otp
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
 
     - name: auth-v1-factors
       url: http://supabase-auth:9999/factors
@@ -69,6 +157,28 @@ data:
         - /auth/v1/factors
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
       - name: key-auth
         config:
           hide_credentials: false
@@ -90,6 +200,28 @@ data:
         - /auth/v1/user
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
       - name: key-auth
         config:
           hide_credentials: false
@@ -109,6 +241,28 @@ data:
         - /auth/v1/
       plugins:
       - name: cors
+        config:
+          origins:
+          - "*"
+          credentials: true
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          - apikey
+          methods:
+          - GET
+          - HEAD
+          - PUT
+          - PATCH
+          - POST
+          - DELETE
+          - OPTIONS
       - name: key-auth
         config:
           hide_credentials: false
