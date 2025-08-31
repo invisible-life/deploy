@@ -141,7 +141,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: invisible-ui-hub
+            name: ui-hub
             port:
               number: 80
   - host: chat.$BASE_DOMAIN
@@ -151,7 +151,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: invisible-ui-chat
+            name: ui-chat
             port:
               number: 80
   - host: api.$BASE_DOMAIN

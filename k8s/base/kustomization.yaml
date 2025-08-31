@@ -7,6 +7,7 @@ resources:
   - supabase/
   - services/
   - ui/
+  - ingress/
 
 # Common labels for all resources
 commonLabels:
