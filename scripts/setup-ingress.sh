@@ -271,58 +271,27 @@ EOF
 }
 
 
-# Update API configuration to use domain URLs instead of IP:port
+# Update domain configuration ConfigMap
 update_api_config() {
     local base_domain=$1
     local enable_https=$2
-    local protocol="http"
     
-    if [[ "$enable_https" == "y" ]]; then
-        protocol="https"
-    fi
+    print_info "Updating domain configuration..."
     
-    print_info "Updating API configuration to use domain URLs..."
+    # Update only the BASE_DOMAIN and USE_HTTPS keys in the ConfigMap
+    kubectl patch configmap domain-config -n invisible --type merge -p "{\"data\":{\"BASE_DOMAIN\":\"$base_domain\",\"USE_HTTPS\":\"$enable_https\"}}"
     
-    # Create domain configuration patch
-    DOMAIN_PATCH_FILE="/tmp/api-domain-patch.yaml"
-    
-    cat > "$DOMAIN_PATCH_FILE" <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: invisible-api
-  namespace: invisible
-spec:
-  template:
-    spec:
-      containers:
-      - name: api
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: API_PUBLIC_URL
-          value: "$protocol://api.$base_domain"
-        - name: SUPABASE_PUBLIC_URL
-          value: "$protocol://supabase.$base_domain"
-        - name: UI_HUB_PUBLIC_URL
-          value: "$protocol://hub.$base_domain"
-        - name: UI_CHAT_PUBLIC_URL
-          value: "$protocol://chat.$base_domain"
-        - name: CORS_ORIGINS
-          value: "$protocol://hub.$base_domain,$protocol://chat.$base_domain,$protocol://api.$base_domain"
-EOF
-    
-    # Apply the patch using kubectl patch with strategic merge
-    print_info "Patching API deployment with domain URLs..."
-    kubectl patch deployment invisible-api -n invisible --type='strategic' --patch "$(cat $DOMAIN_PATCH_FILE)"
+    # Restart the API deployment to pick up the new ConfigMap values
+    print_info "Restarting API deployment to apply new configuration..."
+    kubectl rollout restart deployment/invisible-api -n invisible
     
     # Wait for rollout to complete
-    print_info "Waiting for API deployment to update..."
+    print_info "Waiting for API deployment to restart..."
     kubectl rollout status deployment/invisible-api -n invisible --timeout=120s
     
     # Verify the configuration took effect
     print_info "Verifying API configuration..."
-    sleep 5  # Give the API a moment to restart
+    sleep 5  # Give the API a moment to start
     
     # Test the config endpoint
     if command -v curl &> /dev/null; then
@@ -333,8 +302,11 @@ EOF
             print_warning "API may still be starting up. Check $protocol://api.$base_domain/api/config to verify domain URLs are being used."
         fi
     else
-        print_success "API configuration updated to use domain URLs"
+        print_success "Domain configuration ConfigMap updated successfully"
     fi
+    
+    print_info "Domain configuration stored in ConfigMap 'domain-config'"
+    print_info "To view current configuration: kubectl get configmap domain-config -n invisible -o yaml"
 }
 
 # Setup cert-manager for HTTPS
@@ -392,14 +364,42 @@ show_status() {
     kubectl get svc -n invisible
 }
 
+# Reset to IP-based configuration
+reset_to_ip_config() {
+    print_header "Resetting to IP-based Configuration"
+    
+    print_info "Resetting domain configuration to use IP addresses..."
+    
+    # Get server IP
+    SERVER_IP=$(kubectl get configmap server-config -n invisible -o jsonpath='{.data.SERVER_IP}')
+    
+    # Reset BASE_DOMAIN to empty to trigger IP-based URLs
+    kubectl patch configmap domain-config -n invisible --type merge -p '{"data":{"BASE_DOMAIN":"","USE_HTTPS":"false"}}'
+    
+    print_info "Restarting API deployment..."
+    kubectl rollout restart deployment/invisible-api -n invisible
+    kubectl rollout status deployment/invisible-api -n invisible --timeout=120s
+    
+    print_success "Configuration reset to IP-based access"
+    print_info "Services accessible at:"
+    echo "  • http://$SERVER_IP:30080 (UI Hub)"
+    echo "  • http://$SERVER_IP:30081 (UI Chat)"
+    echo "  • http://$SERVER_IP:30084 (API)"
+    echo "  • http://$SERVER_IP:30082 (Supabase)"
+}
+
 # Parse arguments
 case "${1:-}" in
     status)
         show_status
         ;;
+    reset)
+        reset_to_ip_config
+        ;;
     *)
         main
         echo ""
         print_info "Run '$0 status' to check ingress status"
+        print_info "Run '$0 reset' to reset to IP-based configuration"
         ;;
 esac

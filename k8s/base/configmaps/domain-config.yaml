@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: domain-config
+  labels:
+    app.kubernetes.io/name: invisible
+    app.kubernetes.io/component: config
+data:
+  # Domain configuration
+  # When BASE_DOMAIN is empty, the API will use IP-based URLs
+  # When BASE_DOMAIN is set, the API will construct domain-based URLs
+  BASE_DOMAIN: ""
+  USE_HTTPS: "false"

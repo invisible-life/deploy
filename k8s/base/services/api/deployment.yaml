@@ -116,13 +116,23 @@ spec:
             configMapKeyRef:
               name: service-endpoints
               key: EXTERNAL_UI_HUB_PORT
-        # Public URLs built from SERVER_IP and external ports
-        - name: API_PUBLIC_URL
-          value: "http://$(SERVER_IP):$(EXTERNAL_API_PORT)"
-        - name: SUPABASE_PUBLIC_URL
-          value: "http://$(SERVER_IP):$(EXTERNAL_SUPABASE_PORT)"
-        - name: UI_HUB_PUBLIC_URL
-          value: "http://$(SERVER_IP):$(EXTERNAL_UI_HUB_PORT)"
+        # Domain configuration
+        - name: BASE_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: domain-config
+              key: BASE_DOMAIN
+              optional: true
+        - name: USE_HTTPS
+          valueFrom:
+            configMapKeyRef:
+              name: domain-config
+              key: USE_HTTPS
+              optional: true
+        # Public URLs - computed by the API based on BASE_DOMAIN
+        # If BASE_DOMAIN is set, use domain URLs, otherwise use IP:port
+        - name: COMPUTE_URLS_FROM_DOMAIN
+          value: "true"
         - name: SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:
@@ -136,9 +146,9 @@ spec:
               key: CREDENTIALS_ENCRYPTION_KEY
         - name: ENCRYPTION_ALGORITHM
           value: "aes-256-gcm"
-        # CORS Configuration
+        # CORS Configuration - computed based on BASE_DOMAIN
         - name: CORS_ORIGINS
-          value: "*"  # Allow all origins - the app should handle CORS properly
+          value: "*"  # Will be computed by API if BASE_DOMAIN is set
         - name: CORS_ENABLED
           value: "true"
         # Mailpit Configuration
