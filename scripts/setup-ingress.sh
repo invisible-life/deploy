@@ -197,8 +197,12 @@ EOF
     
     print_success "Domain-based routing configured!"
     
-    # Get server IP
-    SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || kubectl get nodes -o wide | awk 'NR==2 {print $6}' || echo "YOUR-SERVER-IP")
+    # Get server IPv4 address
+    SERVER_IP=$(curl -4 -s ifconfig.me 2>/dev/null || \
+                curl -s ipv4.icanhazip.com 2>/dev/null || \
+                curl -s api.ipify.org 2>/dev/null || \
+                kubectl get nodes -o wide | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -1 || \
+                echo "YOUR-SERVER-IP")
     
     print_header "📋 REQUIRED DNS CONFIGURATION"
     
@@ -206,16 +210,24 @@ EOF
     echo -e "${CYAN}Add these DNS records in your domain provider's control panel:${NC}"
     echo -e "${YELLOW}════════════════════════════════════════════════════════════════════${NC}"
     echo ""
-    echo -e "${GREEN}Option 1: Individual A Records (Recommended)${NC}"
+    # Detect if we got an IPv6 address (contains colons)
+    if [[ "$SERVER_IP" == *":"* ]]; then
+        RECORD_TYPE="AAAA"
+        print_warning "IPv6 address detected. You'll need AAAA records instead of A records."
+    else
+        RECORD_TYPE="A"
+    fi
+    
+    echo -e "${GREEN}Option 1: Individual ${RECORD_TYPE} Records (Recommended)${NC}"
     echo -e "  ${GREEN}Type${NC}    ${GREEN}Name/Host${NC}                     ${GREEN}Value/Points To${NC}"
     echo -e "  ────    ─────────                     ───────────────"
-    echo -e "  ${BLUE}A${NC}       hub                      →    ${YELLOW}$SERVER_IP${NC}"
-    echo -e "  ${BLUE}A${NC}       chat                     →    ${YELLOW}$SERVER_IP${NC}"
-    echo -e "  ${BLUE}A${NC}       api                      →    ${YELLOW}$SERVER_IP${NC}"
-    echo -e "  ${BLUE}A${NC}       supabase                 →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}${RECORD_TYPE}${NC}       hub                      →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}${RECORD_TYPE}${NC}       chat                     →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}${RECORD_TYPE}${NC}       api                      →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "  ${BLUE}${RECORD_TYPE}${NC}       supabase                 →    ${YELLOW}$SERVER_IP${NC}"
     echo ""
-    echo -e "${GREEN}Option 2: Wildcard A Record (Easier but less flexible)${NC}"
-    echo -e "  ${BLUE}A${NC}       *                        →    ${YELLOW}$SERVER_IP${NC}"
+    echo -e "${GREEN}Option 2: Wildcard ${RECORD_TYPE} Record (Easier but less flexible)${NC}"
+    echo -e "  ${BLUE}${RECORD_TYPE}${NC}       *                        →    ${YELLOW}$SERVER_IP${NC}"
     echo -e "  ${CYAN}(This will route ALL subdomains to your server)${NC}"
     echo ""
     echo -e "${YELLOW}════════════════════════════════════════════════════════════════════${NC}"
