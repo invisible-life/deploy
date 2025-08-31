@@ -148,12 +148,6 @@ spec:
         - name: GOTRUE_RATE_LIMIT_EMAIL_SENT
           value: "3600"
         
-        # CORS Configuration
-        - name: GOTRUE_CORS_ALLOWED_ORIGINS
-          value: "https://chat.kerman.ai,https://hub.kerman.ai,https://api.kerman.ai"
-        - name: GOTRUE_CORS_ALLOWED_HEADERS
-          value: "authorization,apikey,content-type,x-client-info,x-supabase-api-version"
-        
         # MFA Configuration
         - name: GOTRUE_MFA_ENABLED
           value: "true"
