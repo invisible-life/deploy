@@ -74,22 +74,15 @@ main() {
     check_prerequisites
     
     echo ""
-    print_info "This script will set up ingress routes for domain access."
-    print_info "You can choose between:"
-    echo "  1. Domain-based routing (recommended for production)"
-    echo "  2. Path-based routing (for single domain/IP)"
+    print_info "This script will set up domain-based ingress routes for the Invisible platform."
+    print_info "Services will be accessible via subdomains:"
+    echo "  • hub.yourdomain.com"
+    echo "  • chat.yourdomain.com"
+    echo "  • api.yourdomain.com"
+    echo "  • supabase.yourdomain.com"
     echo ""
     
-    read -p "Choose routing type (1 for domain, 2 for path): " ROUTING_TYPE
-    
-    if [[ "$ROUTING_TYPE" == "1" ]]; then
-        setup_domain_routing
-    elif [[ "$ROUTING_TYPE" == "2" ]]; then
-        setup_path_routing
-    else
-        print_error "Invalid choice"
-        exit 1
-    fi
+    setup_domain_routing
 }
 
 # Setup domain-based routing
@@ -112,8 +105,10 @@ setup_domain_routing() {
     
     read -p "Enable HTTPS with Let's Encrypt? (y/n): " ENABLE_HTTPS
     
-    # Create the ingress manifest
-    cat > /tmp/invisible-ingress.yaml <<EOF
+    # Create the ingress manifest in a temp file
+    INGRESS_FILE="/tmp/invisible-ingress.yaml"
+    
+    cat > "$INGRESS_FILE" <<EOF
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -198,7 +193,7 @@ EOF
     
     # Apply the ingress
     print_info "Applying ingress configuration..."
-    kubectl apply -f /tmp/invisible-ingress.yaml
+    kubectl apply -f "$INGRESS_FILE"
     
     print_success "Domain-based routing configured!"
     
@@ -224,100 +219,6 @@ EOF
     fi
 }
 
-# Setup path-based routing
-setup_path_routing() {
-    print_header "Setting up Path-based Routing"
-    
-    read -p "Enter your domain or IP (e.g., invisible.yourdomain.com or 164.92.71.207): " DOMAIN_OR_IP
-    
-    if [[ -z "$DOMAIN_OR_IP" ]]; then
-        print_error "Domain or IP is required"
-        exit 1
-    fi
-    
-    print_info "Creating path-based routes:"
-    echo "  • $DOMAIN_OR_IP/        → UI Hub"
-    echo "  • $DOMAIN_OR_IP/chat    → UI Chat"
-    echo "  • $DOMAIN_OR_IP/api     → API"
-    echo "  • $DOMAIN_OR_IP/supabase → Supabase"
-    echo ""
-    
-    # Create the ingress manifest
-    cat > /tmp/invisible-ingress.yaml <<EOF
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: invisible-ingress-paths
-  namespace: invisible
-  annotations:
-    kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-    # Rewrite paths to strip the prefix
-    traefik.ingress.kubernetes.io/router.middlewares: invisible-stripprefix@kubernetescrd
-spec:
-  rules:
-  - host: $DOMAIN_OR_IP
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: invisible-ui-hub
-            port:
-              number: 80
-      - path: /chat
-        pathType: Prefix
-        backend:
-          service:
-            name: invisible-ui-chat
-            port:
-              number: 80
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: invisible-api
-            port:
-              number: 4300
-      - path: /supabase
-        pathType: Prefix
-        backend:
-          service:
-            name: supabase-kong
-            port:
-              number: 8000
-EOF
-    
-    # Create middleware for path stripping
-    cat > /tmp/invisible-middleware.yaml <<EOF
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: stripprefix
-  namespace: invisible
-spec:
-  stripPrefix:
-    prefixes:
-      - /chat
-      - /api
-      - /supabase
-EOF
-    
-    # Apply configurations
-    print_info "Applying ingress configuration..."
-    kubectl apply -f /tmp/invisible-middleware.yaml
-    kubectl apply -f /tmp/invisible-ingress.yaml
-    
-    print_success "Path-based routing configured!"
-    
-    print_header "Access URLs"
-    print_info "Your services are available at:"
-    echo "  • Hub:      http://$DOMAIN_OR_IP/"
-    echo "  • Chat:     http://$DOMAIN_OR_IP/chat"
-    echo "  • API:      http://$DOMAIN_OR_IP/api"
-    echo "  • Supabase: http://$DOMAIN_OR_IP/supabase"
-}
 
 # Setup cert-manager for HTTPS
 setup_cert_manager() {
