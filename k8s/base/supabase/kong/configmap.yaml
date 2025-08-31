@@ -39,7 +39,7 @@ data:
         - apikey
         - x-supabase-api-version
         max_age: 3600
-        preflight_continue: true
+        preflight_continue: false
 
     consumers:
     - username: anon
@@ -67,7 +67,7 @@ data:
           origins:
           - "*"
           credentials: true
-          preflight_continue: true
+          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
@@ -108,7 +108,7 @@ data:
           origins:
           - "*"
           credentials: true
-          preflight_continue: true
+          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
@@ -149,7 +149,7 @@ data:
           origins:
           - "*"
           credentials: true
-          preflight_continue: true
+          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
@@ -190,7 +190,7 @@ data:
           origins:
           - "*"
           credentials: true
-          preflight_continue: true
+          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
@@ -231,7 +231,7 @@ data:
           origins:
           - "*"
           credentials: true
-          preflight_continue: true
+          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
@@ -283,7 +283,7 @@ data:
           origins:
           - "*"
           credentials: true
-          preflight_continue: true
+          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
