@@ -90,46 +90,41 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: CREDENTIALS_ENCRYPTION_KEY
+        - name: HEALTH_PORT
+          value: "3001"
+        # Expose health check port
+        ports:
+        - containerPort: 3001
+          name: health
+          protocol: TCP
         # Health checks
         startupProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - |
-              # Check if node process is running by checking /proc/1/cmdline
-              grep -q node /proc/1/cmdline || exit 1
-          initialDelaySeconds: 5
+          httpGet:
+            path: /health
+            port: health
+          initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 5
           failureThreshold: 12  # 60 seconds to start
           successThreshold: 1
-        # Disabled liveness probe until we have proper health checks
-        # The process-based check is useless for detecting stuck LLM calls
-        # livenessProbe:
-        #   exec:
-        #     command:
-        #     - /bin/sh
-        #     - -c
-        #     - |
-        #       # Check if node process is still running
-        #       grep -q node /proc/1/cmdline || exit 1
-        #   initialDelaySeconds: 60
-        #   periodSeconds: 60  # Check every minute
-        #   timeoutSeconds: 5
-        #   failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: health
+          initialDelaySeconds: 60
+          periodSeconds: 30  # Check every 30 seconds
+          timeoutSeconds: 5
+          failureThreshold: 3  # Restart after 3 failures (90 seconds of unhealthy)
+          successThreshold: 1
         readinessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - |
-              # Check if processor is running
-              grep -q node /proc/1/cmdline || exit 1
+          httpGet:
+            path: /ready
+            port: health
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
+          successThreshold: 1
         resources:
           requests:
             cpu: 500m

@@ -55,7 +55,7 @@ data:
 
     services:
     - name: auth-v1-open-verify
-      url: http://supabase-auth:9999/verify
+      url: http://supabase-auth:9999
       routes:
       - name: auth-v1-open-verify
         strip_path: true
@@ -96,7 +96,7 @@ data:
           max_age: 3600
 
     - name: auth-v1-open-callback
-      url: http://supabase-auth:9999/callback
+      url: http://supabase-auth:9999
       routes:
       - name: auth-v1-open-callback
         strip_path: true
@@ -137,7 +137,7 @@ data:
           max_age: 3600
 
     - name: auth-v1-open-authorize
-      url: http://supabase-auth:9999/authorize
+      url: http://supabase-auth:9999
       routes:
       - name: auth-v1-open-authorize
         strip_path: true
