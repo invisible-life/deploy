@@ -97,8 +97,8 @@ spec:
             - /bin/sh
             - -c
             - |
-              # Check if node process is running
-              ps aux | grep -v grep | grep "node.*dist/index.js" > /dev/null || exit 1
+              # Check if node process is running by checking /proc/1/cmdline
+              grep -q node /proc/1/cmdline || exit 1
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 5
@@ -111,7 +111,7 @@ spec:
             - -c
             - |
               # Check if node process is still running
-              ps aux | grep -v grep | grep "node.*dist/index.js" > /dev/null || exit 1
+              grep -q node /proc/1/cmdline || exit 1
           initialDelaySeconds: 60
           periodSeconds: 60  # Check every minute
           timeoutSeconds: 5
@@ -122,9 +122,8 @@ spec:
             - /bin/sh
             - -c
             - |
-              # Check if processor is running and connected to DB
-              # Look for DB Pool connection logs in recent output
-              ps aux | grep -v grep | grep "node.*dist/index.js" > /dev/null || exit 1
+              # Check if processor is running
+              grep -q node /proc/1/cmdline || exit 1
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
