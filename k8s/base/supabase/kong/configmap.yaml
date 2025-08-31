@@ -54,27 +54,27 @@ data:
       - group: service_role
 
     services:
-    - name: auth-v1-options-handler
-      host: localhost
-      port: 65535
-      protocol: http
+    - name: options-mock-service
+      url: http://httpbin.org/status/200
       routes:
-      - name: auth-v1-options-routes
+      - name: auth-v1-options-preflight
         methods:
         - OPTIONS
         paths:
-        - /auth/v1/
+        - ~/auth/v1.*
+        regex_priority: 1000
       plugins:
       - name: request-termination
         config:
           status_code: 200
-          message: "OK"
+          content_type: "application/json"
+          body: |
+            {"status": "ok"}
       - name: cors
         config:
           origins:
           - "*"
           credentials: true
-          preflight_continue: false
           headers:
           - Accept
           - Accept-Version
