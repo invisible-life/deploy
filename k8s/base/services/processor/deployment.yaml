@@ -46,7 +46,9 @@ spec:
         - name: HEARTBEAT_INTERVAL_MS
           value: "30000"  # 30 seconds heartbeat for DeepSeek R1
         - name: MAX_PROCESSING_TIME_MS
-          value: "900000"  # 15 minutes max for DeepSeek R1 reasoning
+          value: "120000"  # 2 minutes max - use fallback if LLM takes too long
+        - name: LLM_TIMEOUT_MS
+          value: "30000"   # 30 seconds per LLM call before giving up
         # Database
         - name: POSTGRES_HOST
           value: "supabase-db"
@@ -128,8 +130,8 @@ spec:
           successThreshold: 1
         resources:
           requests:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 2000m     # 2 CPU cores for faster processing
+            memory: 4Gi    # 4GB RAM for handling multiple containers
           limits:
-            cpu: 2000m
-            memory: 2Gi
+            cpu: 4000m     # Allow bursting to 4 cores
+            memory: 8Gi    # Max 8GB RAM
