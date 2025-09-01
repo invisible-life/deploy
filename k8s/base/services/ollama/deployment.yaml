@@ -59,11 +59,11 @@ spec:
           periodSeconds: 30
         resources:
           requests:
-            cpu: 8000m     # 8 CPU cores (40% of total)
-            memory: 32Gi   # 32GB RAM - half the machine's memory
+            cpu: 14000m    # 14 CPU cores (70% of total) - guaranteed
+            memory: 45Gi   # 45GB RAM (72% of total) - guaranteed
           limits:
-            cpu: 14000m    # Allow bursting to 14 cores (70% of total)
-            memory: 48Gi   # Max 48GB RAM - 77% of total
+            cpu: 18000m    # Allow bursting to 18 cores (90% of total)
+            memory: 55Gi   # Max 55GB RAM (88% of total)
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
