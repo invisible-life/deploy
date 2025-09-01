@@ -46,9 +46,9 @@ spec:
         - name: HEARTBEAT_INTERVAL_MS
           value: "30000"  # 30 seconds heartbeat for DeepSeek R1
         - name: MAX_PROCESSING_TIME_MS
-          value: "120000"  # 2 minutes max - use fallback if LLM takes too long
+          value: "600000"  # 10 minutes max per container
         - name: LLM_TIMEOUT_MS
-          value: "30000"   # 30 seconds per LLM call before giving up
+          value: "300000"  # 5 minutes per LLM call for DeepSeek R1 reasoning
         # Database
         - name: POSTGRES_HOST
           value: "supabase-db"
