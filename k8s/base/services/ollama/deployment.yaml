@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/component: llm
 spec:
   replicas: 1
+  revisionHistoryLimit: 2  # Keep only 2 old replica sets for rollback
   selector:
     matchLabels:
       app.kubernetes.io/name: ollama
@@ -58,11 +59,11 @@ spec:
           periodSeconds: 30
         resources:
           requests:
-            cpu: 2000m     # 2 CPU cores for DeepSeek R1:8b
-            memory: 8Gi    # 8GB RAM is plenty for 8b model
+            cpu: 8000m     # 8 CPU cores for better performance
+            memory: 20Gi   # 20GB RAM for larger models and faster inference
           limits:
-            cpu: 4000m     # Allow bursting to 4 cores
-            memory: 16Gi   # Max 16GB RAM
+            cpu: 16000m    # Allow bursting to 16 cores
+            memory: 40Gi   # Max 40GB RAM for heavy workloads
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
