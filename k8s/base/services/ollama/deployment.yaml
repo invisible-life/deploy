@@ -59,11 +59,11 @@ spec:
           periodSeconds: 30
         resources:
           requests:
-            cpu: 8000m     # 8 CPU cores for better performance
-            memory: 20Gi   # 20GB RAM for larger models and faster inference
+            cpu: 12000m    # 12 CPU cores for better performance
+            memory: 32Gi   # 32GB RAM - half the machine's memory
           limits:
-            cpu: 16000m    # Allow bursting to 16 cores
-            memory: 40Gi   # Max 40GB RAM for heavy workloads
+            cpu: 18000m    # Allow bursting to 18 cores
+            memory: 48Gi   # Max 48GB RAM - 75% of total
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
