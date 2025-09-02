@@ -46,14 +46,14 @@ spec:
               key: EXTERNAL_API_PORT
         # Build public URLs from IP and ports
         - name: VITE_SUPABASE_URL
-          value: "https://api.kerman.ai"  # Use domain instead of IP
+          value: "http://$(SERVER_IP):$(EXTERNAL_SUPABASE_PORT)"
         - name: VITE_SUPABASE_ANON_KEY
           valueFrom:
             secretKeyRef:
               name: supabase-secrets
               key: ANON_KEY
         - name: VITE_API_URL
-          value: "https://api.kerman.ai"  # Use domain instead of IP
+          value: "http://$(SERVER_IP):$(EXTERNAL_API_PORT)"
         # Nginx proxy configuration
         - name: API_HOST
           value: "invisible-api.invisible.svc.cluster.local"

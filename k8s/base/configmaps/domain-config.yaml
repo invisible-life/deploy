@@ -9,5 +9,5 @@ data:
   # Domain configuration
   # When BASE_DOMAIN is empty, the API will use IP-based URLs
   # When BASE_DOMAIN is set, the API will construct domain-based URLs
-  BASE_DOMAIN: "kerman.ai"
-  USE_HTTPS: "true"
+  BASE_DOMAIN: ""
+  USE_HTTPS: "false"
