@@ -55,8 +55,8 @@ patches:
         path: /spec/template/spec/containers/0/resources
         value:
           requests:
-            cpu: 1000m
-            memory: 2Gi
+            cpu: 2000m
+            memory: 4Gi
           limits:
             cpu: 4000m
             memory: 8Gi
@@ -91,6 +91,23 @@ patches:
           limits:
             cpu: 2000m
             memory: 2Gi
+
+  - target:
+      kind: Deployment
+      name: ollama
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 14000m
+            memory: 45Gi
+          limits:
+            cpu: 18000m
+            memory: 55Gi
 
   # Use specific image tags for production (these should be updated as part of CI/CD)
   - target:
