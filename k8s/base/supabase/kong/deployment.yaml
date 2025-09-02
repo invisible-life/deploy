@@ -86,11 +86,11 @@ spec:
           mountPath: /var/lib/kong
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
+            cpu: 500m
+            memory: 1Gi      # Increased from 256Mi to prevent OOM
           limits:
-            cpu: 1000m
-            memory: 1Gi
+            cpu: 2000m
+            memory: 2Gi      # Increased from 1Gi for API gateway
       volumes:
       - name: kong-config-template
         configMap:
