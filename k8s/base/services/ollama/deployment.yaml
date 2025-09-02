@@ -59,11 +59,11 @@ spec:
           periodSeconds: 30
         resources:
           requests:
-            cpu: 14000m    # 14 CPU cores (70% of total) - guaranteed
-            memory: 45Gi   # 45GB RAM (72% of total) - guaranteed
+            cpu: 8000m     # 8 CPU cores - reduced to prevent resource starvation
+            memory: 30Gi   # 30GB RAM - leaves room for database and other services
           limits:
-            cpu: 18000m    # Allow bursting to 18 cores (90% of total)
-            memory: 55Gi   # Max 55GB RAM (88% of total)
+            cpu: 12000m    # Allow bursting to 12 cores
+            memory: 40Gi   # Max 40GB RAM - prevents OOM killing other pods
       volumes:
       - name: ollama-data
         persistentVolumeClaim:
