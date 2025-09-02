@@ -87,11 +87,11 @@ spec:
           periodSeconds: 5
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
-          limits:
             cpu: 1000m
-            memory: 1Gi
+            memory: 4Gi      # Increased from 256Mi to prevent OOM
+          limits:
+            cpu: 2000m
+            memory: 8Gi      # Increased from 1Gi to handle migrations
       volumes:
       - name: postgres-data
         persistentVolumeClaim:
